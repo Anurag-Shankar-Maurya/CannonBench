@@ -8,6 +8,7 @@ import type { AutocannonResultSummary, TickSample } from '@/types/benchmark';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 300;
 
 const HeaderSchema = z.object({
   id: z.string().optional(),

@@ -108,11 +108,15 @@ export default function CannonBenchApp() {
   const handleStopBenchmark = async () => {
     if (!isRunning || !activeRunId) return;
     try {
-      await fetch('/api/benchmark/stop', {
+      const res = await fetch('/api/benchmark/stop', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ runId: activeRunId }),
       });
+      const data = (await res.json().catch(() => ({}))) as { stopped?: boolean };
+      if (!data.stopped) {
+        abortControllerRef.current?.abort();
+      }
       notify('Stopping benchmark...');
     } catch {
       abortControllerRef.current?.abort();

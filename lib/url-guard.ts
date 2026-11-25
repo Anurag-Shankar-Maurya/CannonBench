@@ -76,8 +76,19 @@ export async function validateBenchmarkTargetUrl(
     (requestHostOnly !== '' && hostname === requestHostOnly);
 
   if (isLocalHostMatch && parsed.pathname === '/api/sandbox/target') {
+    // Locally / on containers, route straight to localhost; on Vercel serverless,
+    // route through the deployment's public HTTPS URL if not localhost.
+    const useLoopback =
+      !process.env.VERCEL || hostname === 'localhost' || hostname === '127.0.0.1';
+    if (useLoopback) {
+      return {
+        executionUrl: `http://127.0.0.1:${localPort}/api/sandbox/target${parsed.search}`,
+        displayUrl: parsed.href,
+        isSandbox: true,
+      };
+    }
     return {
-      executionUrl: `http://127.0.0.1:${localPort}/api/sandbox/target${parsed.search}`,
+      executionUrl: parsed.href,
       displayUrl: parsed.href,
       isSandbox: true,
     };

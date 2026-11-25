@@ -3,6 +3,9 @@ import type {NextConfig} from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ['autocannon'],
+  outputFileTracingIncludes: {
+    '/api/benchmark': ['./node_modules/autocannon/**/*'],
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -20,7 +23,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: 'standalone',
+  ...(process.env.VERCEL ? {} : { output: 'standalone' }),
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.
