@@ -26,18 +26,18 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'CannonBench — Autocannon Load & Stress Testing',
   description:
-    'Lightweight HTTP/1.1 & HTTP/2 load and stress testing platform powered by Autocannon with live streaming telemetry, HAR replay, bottleneck diagnostics, and run-to-run comparisons.',
+    'Modern HTTP/1.1 & HTTP/2 load and stress testing dashboard powered by Autocannon with real-time streaming telemetry, percentile distributions, HAR replay, and run comparisons.',
   openGraph: {
     title: 'CannonBench — Autocannon Load & Stress Testing',
     description:
-      'Lightweight HTTP/1.1 & HTTP/2 load and stress testing platform powered by Autocannon.',
+      'Modern HTTP/1.1 & HTTP/2 load and stress testing dashboard powered by Autocannon.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'CannonBench — Autocannon Load & Stress Testing',
     description:
-      'Lightweight HTTP/1.1 & HTTP/2 load and stress testing platform powered by Autocannon.',
+      'Modern HTTP/1.1 & HTTP/2 load and stress testing dashboard powered by Autocannon.',
   },
 };
 
