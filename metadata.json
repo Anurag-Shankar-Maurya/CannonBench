@@ -1,0 +1,6 @@
+{
+  "name": "CannonBench",
+  "description": "Lightweight HTTP/1.1 & HTTP/2 load and stress testing platform powered by Autocannon with live streaming telemetry, HAR replay, bottleneck diagnostics, and run-to-run comparisons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
