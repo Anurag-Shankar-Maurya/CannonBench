@@ -157,6 +157,18 @@ export function analyzeBottlenecks(
     });
   }
 
+  // Check for 100% errors in browser mode (CORS block)
+  if (result.requests.total === 0 && result.errors > 0) {
+    findings.push({
+      id: 'browser-cors-blocked',
+      severity: 'critical',
+      title: 'CORS Blocked by Target Server (Browser Sandbox)',
+      detail:
+        'The target server did not return the required "Access-Control-Allow-Origin" header, causing your web browser to block every request. Switch to ⚡ Native Mode (which uses raw TCP sockets and bypasses browser CORS) or enter a CORS Proxy in Advanced Options.',
+      metric: `${result.errors} blocked requests`,
+    });
+  }
+
   // 1. Rate limiting check (429)
   const count429 = result.statusCodeStats['429']?.count ?? 0;
   if (count429 > 0) {

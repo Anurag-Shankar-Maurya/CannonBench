@@ -75,6 +75,10 @@ const BenchmarkRequestSchema = z.object({
       recoveryDurationSec: z.number().int().min(1).max(60),
     })
     .optional(),
+  sloTargetLatencyMs: z.number().optional().default(150),
+  sloMaxErrorPct: z.number().optional().default(1),
+  sloMaxP99Ms: z.number().optional().default(250),
+  sloMinRps: z.number().optional().default(50),
 });
 
 type ValidatedInput = z.infer<typeof BenchmarkRequestSchema>;

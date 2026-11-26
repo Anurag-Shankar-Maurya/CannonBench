@@ -238,9 +238,18 @@ export default function ResultsDistribution({ run }: ResultsDistributionProps) {
           {/* Exact HTTP Status Code Table */}
           <div className="overflow-x-auto">
             {statusEntries.length === 0 ? (
-              <p className="text-xs text-slate-500 py-4">
-                No HTTP status responses recorded (connection timeouts or socket errors occurred).
-              </p>
+              <div className="py-3.5 px-4 bg-rose-50/80 border border-rose-200/80 rounded-xl space-y-1.5">
+                <div className="text-xs font-semibold text-rose-800 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                  <span>CORS / Cross-Origin Block (Browser Mode)</span>
+                </div>
+                <p className="text-[11px] text-rose-700 leading-relaxed">
+                  The target API did not return an <code className="font-mono bg-rose-100/70 px-1 py-0.5 rounded text-rose-900">Access-Control-Allow-Origin</code> header, so your browser blocked all cross-origin requests.
+                </p>
+                <div className="pt-0.5 text-[11px] text-indigo-900 font-medium">
+                  💡 <strong>Solution:</strong> Switch to <strong>⚡ Native Mode</strong> in the top control bar to benchmark with raw TCP sockets (which bypasses browser CORS entirely, just like your terminal).
+                </div>
+              </div>
             ) : (
               <table className="w-full text-xs">
                 <thead>

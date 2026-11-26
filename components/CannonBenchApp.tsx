@@ -228,6 +228,10 @@ export default function CannonBenchApp() {
               harRaw: snapshotConfig.harRaw ?? null,
               rampConfig: snapshotConfig.rampConfig,
               spikeConfig: snapshotConfig.spikeConfig,
+              sloTargetLatencyMs: snapshotConfig.sloTargetLatencyMs,
+              sloMaxErrorPct: snapshotConfig.sloMaxErrorPct,
+              sloMaxP99Ms: snapshotConfig.sloMaxP99Ms,
+              sloMinRps: snapshotConfig.sloMinRps,
             }),
           });
 
