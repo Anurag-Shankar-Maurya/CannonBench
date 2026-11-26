@@ -98,7 +98,7 @@ export default function RadiantCtaAndFooter() {
                 </li>
                 <li>
                   <a href="#patterns" className="hover:text-white transition-colors">
-                    Eight Patterns
+                    Twenty Patterns
                   </a>
                 </li>
                 <li>
