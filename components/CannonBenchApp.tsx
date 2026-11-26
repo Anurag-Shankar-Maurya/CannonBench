@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { ChevronRight, Download, History, Zap } from 'lucide-react';
 import type {
   AutocannonResultSummary,
@@ -397,14 +398,18 @@ export default function CannonBenchApp() {
         <div className="max-w-[1360px] mx-auto h-full px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-6">
           {/* Brand + Breadcrumbs */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink-0">
-            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
+            <Link
+              href="/"
+              title="Return to CannonBench Home"
+              className="flex items-center gap-2 sm:gap-2.5 shrink-0 group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
                 <Zap className="w-4 h-4 fill-current text-indigo-400" />
               </div>
-              <span className="text-sm sm:text-base font-bold tracking-tight text-slate-900 whitespace-nowrap">
+              <span className="text-sm sm:text-base font-bold tracking-tight text-slate-900 whitespace-nowrap group-hover:text-indigo-600 transition-colors">
                 CannonBench
               </span>
-            </div>
+            </Link>
 
             <div className="hidden md:flex items-center gap-2 text-xs text-slate-400 truncate">
               <ChevronRight className="w-3.5 h-3.5 shrink-0" />
