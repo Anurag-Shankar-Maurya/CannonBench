@@ -1,103 +1,168 @@
-# CannonBench
+# ⚡ CannonBench
 
-A lightweight, clean web workbench for HTTP/1.1 and HTTP/2 load and stress testing powered by **[Autocannon](https://github.com/mcollina/autocannon)**—complete with real-time SSE telemetry, stress pattern orchestration, HAR session replay, automated bottleneck diagnostics, run-to-run comparisons, and zero-database browser persistence.
+<p align="center">
+  <strong>The modern HTTP load and stress testing workbench powered by <a href="https://github.com/mcollina/autocannon">Autocannon</a>.</strong><br>
+  Real-time streaming telemetry, dual execution engines (Native Node.js raw sockets & Browser Edge), multi-step request chaining, automated SLO quality gates, and zero-database persistence.
+</p>
 
----
-
-## Features
-
-### 1. Full `npx autocannon` Engine Parity
-- **HTTP Methods & Payloads:** `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS` with raw JSON/text bodies (`-b`), multipart `form-data` text fields (`-F`), custom headers (`-H`), and 1-click Auth helpers (Bearer JWT, API Key, Basic Auth, Cookies).
-- **Concurrency & Rate Controls:** Connections (`-c`), Duration (`-d`), Fixed Request Count (`-a`), Pipelining (`-p`), Worker Threads (`-w`), Warmup phase (`-W`), Overall Rate (`-R`), Connection Rate (`-r`), and Coordinated Omission toggle (`-C`).
-- **Reliability & Assertions:** Error Bailout threshold (`-B`), Response Body verification (`-E`), Connection/Overall request caps (`-M`, `-O`), Reconnect rate (`-D`), Timeout (`-t`), SNI servername (`-s`), and native `[<id>]` replacement (`-I`) plus dynamic `{{$uuid}}`, `{{$timestamp}}`, and `{{$random_int}}` tokens.
-- **Live CLI Command Strip:** Generates the exact mirrored `npx autocannon ...` terminal command as you configure your test.
-
-### 2. Advanced Stress Testing Patterns
-- **Constant:** Steady concurrency for baseline throughput and latency profiling.
-- **Ramp-Up:** Stepped concurrency progression (e.g., `10 → 40 → 70 → 100` connections) stitched into one continuous timeline to pinpoint saturation points.
-- **Spike:** Automated `Baseline → Burst → Recovery` stages to test autoscaling and queue drain behavior.
-- **Soak:** Lower-concurrency extended duration runs to uncover memory or connection leaks.
-- **Rate-Paced:** Fixed RPS targets with Coordinated Omission correction enabled by default.
-
-### 3. Developer Workflows & Diagnostics
-- **Live Streaming Telemetry:** Server-Sent Events (`text/event-stream`) stream 1-second Requests/sec, network bandwidth, and `Avg / p90 / p99` latency curves directly from Autocannon's native `tick` and `response` events.
-- **HAR File Replay (`--har`):** Drag and drop a Chrome DevTools `.har` recording to filter static assets and replay real multi-endpoint user flows.
-- **Built-In Sandbox Target (`/api/sandbox/target`):** Instant safe testing endpoint supporting configurable `delay`, `jitter`, `failRate`, and `rateLimitRps` (`429`) simulation.
-- **Automated Bottleneck Diagnostics & APDEX:** Detects HTTP `429` throttling, `5xx` saturation, `p99/p50` worker starvation skew, socket timeouts, and assertion mismatches.
-- **Local History, Compare & CI Export:** Stores runs and custom presets in browser `localStorage` with side-by-side delta comparisons, HTML/Markdown/JSON report exports, and GitHub Actions CI gate workflow generation.
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/TailwindCSS-v4-38bdf8?style=flat-square&logo=tailwindcss" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Engine-Autocannon-indigo?style=flat-square&logo=node.js" alt="Autocannon" />
+  <img src="https://img.shields.io/badge/Tests-Vitest%2034%2F34-emerald?style=flat-square&logo=vitest" alt="Vitest" />
+  <img src="https://img.shields.io/badge/License-MIT-slate?style=flat-square" alt="License" />
+</p>
 
 ---
 
-## Tech Stack
+## 🚀 Why CannonBench?
 
-- **Framework:** Next.js 15 (App Router, Node.js Runtime)
-- **Load Engine:** `autocannon` programmatic API
-- **Validation:** `zod`
-- **Styling & Icons:** Tailwind CSS v4, `lucide-react`, `Plus Jakarta Sans` / `Public Sans` / `JetBrains Mono`
-- **Persistence:** Browser `localStorage` (zero external database required)
+Terminal load generators like `autocannon`, `wrk`, or `k6` are blazingly fast, but visualizing percentile tails, diagnosing concurrency bottlenecks, and replaying complex user journeys shouldn't require stitching together external Grafana dashboards or writing hundreds of lines of boilerplate.
+
+**CannonBench** bridges the gap: it delivers **100% terminal CLI parity** with raw TCP socket performance through an intuitive, beautifully responsive desktop & mobile interface.
+
+```bash
+# What you used to type in terminal:
+npx autocannon -c 25 -d 30 -m POST -H 'Authorization: Bearer ...' 'https://api.example.com/v1/checkout/'
+
+# What CannonBench gives you:
+# Live 1-second telemetry curves • Latency distribution histograms • Automated SLO pass/fail gates
+# Multi-step chained workflows • 1-click cURL auto-import • HTML & PDF executive reports
+```
 
 ---
 
-## Local Development
+## ✨ Core Features
+
+### 1. Dual Execution Engines
+- **⚡ Native Engine (`native`):** Direct Node.js raw TCP sockets streamed via Server-Sent Events (`/api/benchmark`). 100% identical performance to `npx autocannon` in terminal. Bypasses browser socket pools to sustain 25–500+ concurrent connections.
+- **🌐 Browser Edge Engine (`browser`):** Pure client-side `fetch()` load runner with High-Resolution Resource Timing API metrics. Zero backend requirements—ideal for static hosting, edge deployments, and internal dev testing.
+
+### 2. Smart cURL Auto-Import & Shell Quoting
+- **Paste cURL Anywhere:** Copy any request from Chrome DevTools, Postman, or terminal, and paste it (`Ctrl+V`) into the URL bar or dashboard. CannonBench automatically extracts the Method, URL, Headers, and formatted JSON body.
+- **URL & Query Sanitizer:** Automatically cleans terminal copy-paste artifacts (`\?`, `\&`), fixes duplicate slashes (`//`), cleans multiple `?`/`&` delimiters, and **strictly preserves trailing slashes** (`/`) required by frameworks like Django.
+- **Shell-Safe CLI Generator:** Automatically encloses query strings in single quotes (`'https://api.com?a=1&b=2'`) so copying the CLI equivalent command never crashes in Bash, Zsh, or PowerShell.
+
+### 3. Multi-Step Request Chaining (Postman / k6 Parity)
+- Chain sequential dependent HTTP requests in a single scenario.
+- Extract dynamic response variables via JSONPath (e.g. `$.auth.token` $\to$ `{{authToken}}` or `$.user.id` $\to$ `{{userId}}`).
+- Inject dynamic tokens across subsequent requests, URLs, and headers.
+
+### 4. SLO / SLA Quality Gates & Automated Diagnostics
+- **Threshold Assertions:** Define strict pass/fail rules for $p50$ median latency, $p99$ tail latency, maximum error rate $\%$, and minimum RPS.
+- **Automated Diagnostics:** Real-time root-cause analysis detecting:
+  - Worker starvation & event-loop blockages ($p99/p50$ skew)
+  - HTTP `429` rate limiting & `5xx` server saturation
+  - Browser RFC 2616 connection queueing delays
+  - CORS policy origin restrictions
+
+### 5. Advanced Telemetry & Percentile Distributions
+- **Interactive Telemetry:** Live dual-line charts showing Requests/sec, Network Egress (KB/s), and Latency ($p50, p90, p99$) with 1-second tick resolution.
+- **Timeline Zoom & Scrubbing:** Switch between Full (100%), Last 30s, and Last 10s with toggleable Error Breakdown layers.
+- **Binned Latency Histogram:** Logarithmic frequency curve ($\le 5\text{ms}$ to $> 3000\text{ms}$) revealing multimodal distribution patterns and tail outliers.
+
+### 6. Full Autocannon CLI Options
+- **Load Patterns:** Constant, Ramp-Up (`10 → 40 → 70 → 100`), Spike (Baseline $\to$ Burst $\to$ Recovery), Soak, and Rate-Paced.
+- **Advanced Modifiers:** HTTP Pipelining (`-p`), Worker Threads (`-w`), Error Bailout threshold (`-B`), Response Body verification (`-E`), Warmup phase (`-W`), and Coordinated Omission correction (`-C`).
+- **Dynamic Token Generators:** `{{$uuid}}`, `{{$timestamp}}`, `{{$random_int}}`, and native `[<id>]` replacements.
+
+### 7. Developer Ergonomics & Zero-DB Persistence
+- **1-Click Reset Options:** Wipe stale headers and request bodies back to clean defaults when testing new APIs without losing your target URL.
+- **HAR File Replay:** Drag & drop Chrome DevTools `.har` archives with automatic static asset filtering.
+- **Local History & JSON Backup:** Full run history stored in `localStorage` with side-by-side run delta comparisons and complete JSON backup import/export.
+- **Executive Export:** One-click export to print-ready HTML, PDF, Markdown, and GitHub Actions CI workflow templates.
+
+---
+
+## 🛠️ Architecture
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│                       CannonBench UI                          │
+│     (Next.js 15 App Router • Tailwind CSS v4 • Lucide)        │
+└──────────────┬────────────────────────────────┬───────────────┘
+               │                                │
+    [⚡ Native Engine]                   [🌐 Browser Engine]
+               │                                │
+  POST /api/benchmark (SSE Stream)      Client-side fetch() +
+               │                        Resource Timing API
+               ▼                                │
+     Node.js Autocannon Engine                  ▼
+   (Raw TCP Sockets • No 6-conn cap)    Client Browser Thread
+               │                        (Capped at 6 conn / host)
+               ▼                                │
+      Target HTTP/S Server ◄────────────────────┘
+```
+
+---
+
+## ⚡ Quick Start
 
 ### Prerequisites
 - Node.js `>= 20.0.0`
 - `npm`, `pnpm`, or `bun`
 
-### Setup & Run
+### Installation & Run
 
 ```bash
-# 1. Install dependencies
+# 1. Clone the repository
+git clone https://github.com/your-username/cannonbench.git
+cd cannonbench
+
+# 2. Install dependencies
 npm install
 
-# 2. Start the development server
+# 3. Start development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser and click **Start Benchmark** to run your first test against the built-in Sandbox API.
+Open [http://localhost:3000](http://localhost:3000) in your browser. Click **Sandbox** to load the safe, built-in test target (`/api/sandbox/target`) and hit **Start Benchmark** (or press `⌘ + Enter`).
 
-### Production Build Check
+---
+
+## 🧪 Testing & Verification
+
+CannonBench comes with a comprehensive Vitest automated test suite covering variable resolution, percentile computations, cURL parsing, and configuration presets:
 
 ```bash
-npm run lint
+# Run unit and integration tests
+npm test
+
+# Check TypeScript types across the project
+npx tsc --noEmit
+
+# Production build verification
 npm run build
-npm run start
 ```
 
 ---
 
-## Deploying to Vercel
+## 🚢 Deployment
 
-CannonBench is pre-configured for **Vercel** deployments (`vercel.json`, `next.config.ts`, and Fluid Compute `maxDuration` exports).
+### Deploying to Vercel
 
-### Option A: Deploy via Vercel CLI
+CannonBench is optimized for Vercel Fluid Compute and serverless streaming:
 
 ```bash
 npm i -g vercel
 vercel
 ```
 
-### Option B: Deploy via GitHub Integration
-1. Push this repository to GitHub, GitLab, or Bitbucket.
-2. Import the project in the [Vercel Dashboard](https://vercel.com/new).
-3. Leave the framework preset as **Next.js** (no environment variables are required).
-4. Click **Deploy**.
-
-### Important Vercel Notes
-- **Streaming & Timeout (`maxDuration`):** `/api/benchmark` exports `maxDuration = 300` (configured in both `app/api/benchmark/route.ts` and `vercel.json`), enabling up to 5-minute streaming benchmarks on Vercel Fluid Compute (including Hobby plans).
-- **Worker Threads (`-w`):** Standard single-process mode (`workers: 0`) streams live 1-second charts and supports high throughput cleanly inside serverless functions. Keep `workers: 0` on serverless deployments if you want real-time tick charts, as `autocannon` worker threads aggregate histograms only upon completion.
-- **Built-In Sandbox Target & Deployment Protection:** If Vercel **Deployment Protection** (Authentication) is enabled on Preview deployments, external HTTP requests from `/api/benchmark` to `/api/sandbox/target` will receive `401` unless Deployment Protection is disabled or you test external public URLs.
+- **Streaming Duration:** `/api/benchmark` exports `maxDuration = 300` (5 minutes) for long-duration load tests.
+- **Zero Database Required:** All runs and settings persist locally in browser `localStorage`.
+- **Static / Edge Hosting:** Set Engine Mode to `Browser` to deploy CannonBench as a purely static client-side dashboard on GitHub Pages, Cloudflare Pages, or Netlify.
 
 ---
 
-## Security Safeguards
+## 🔒 Security & Safe Testing
 
-- **SSRF Protection:** `/api/benchmark` validates all target URLs and HAR entries (`http:`/`https:` only), resolves DNS records, and blocks private IPv4/IPv6 ranges, loopback addresses, and cloud metadata endpoints (`169.254.169.254`, `metadata.google.internal`).
-- **Resource Caps:** Connections (`<= 500`), duration (`<= 300s`), pipelining (`<= 20`), and worker threads (`<= 4`) are strictly validated via `zod`.
-- **Programmatic Execution:** Options are passed directly to `autocannon` as structured objects—never interpolated into shell commands. Multipart forms only permit text fields to prevent server file access.
+- **Server-Side Request Forgery (SSRF) Guard:** `/api/benchmark` resolves DNS and blocks private IP ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `127.0.0.0/8`) and cloud metadata endpoints (`169.254.169.254`).
+- **Resource Constraints:** Concurrency ($\le 500$), duration ($\le 300\text{s}$), and worker threads ($\le 4$) are strictly validated with Zod.
+- **Safe Sandboxing:** Built-in `/api/sandbox/target` route lets you simulate latency, jitter, error rates, and HTTP 429 throttling without hitting external production APIs.
 
 ---
 
-## License
+## 📄 License
 
-MIT
+MIT © [Anurag Shankar Maurya](https://github.com/anuragshankarmaurya)
