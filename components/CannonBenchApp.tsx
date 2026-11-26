@@ -356,15 +356,15 @@ export default function CannonBenchApp() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 h-16 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
-        <div className="max-w-[1360px] mx-auto h-full px-6 sm:px-8 flex items-center justify-between gap-6">
+      <header className="sticky top-0 z-30 h-14 sm:h-16 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+        <div className="max-w-[1360px] mx-auto h-full px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-3 sm:gap-6">
           {/* Brand + Breadcrumbs */}
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
               <div className="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-xs">
                 <Zap className="w-4 h-4 fill-current text-indigo-400" />
               </div>
-              <span className="text-base font-bold tracking-tight text-slate-900 whitespace-nowrap">
+              <span className="text-sm sm:text-base font-bold tracking-tight text-slate-900 whitespace-nowrap">
                 CannonBench
               </span>
             </div>
@@ -380,14 +380,15 @@ export default function CannonBenchApp() {
           </div>
 
           {/* Right Triggers */}
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             <button
               type="button"
               onClick={() => setHistoryOpen(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200/90 hover:bg-slate-50 rounded-xl shadow-2xs transition-colors whitespace-nowrap shrink-0"
+              title="Run History"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200/90 hover:bg-slate-50 rounded-xl shadow-2xs transition-colors whitespace-nowrap shrink-0"
             >
               <History className="w-3.5 h-3.5 text-slate-500" />
-              <span>Run History</span>
+              <span className="hidden sm:inline">Run History</span>
               {runs.length > 0 && (
                 <span className="font-mono tabular-nums text-[11px] text-slate-500">
                   ({runs.length})
@@ -398,10 +399,11 @@ export default function CannonBenchApp() {
             <button
               type="button"
               onClick={() => setExportOpen(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200/90 hover:bg-slate-50 rounded-xl shadow-2xs transition-colors whitespace-nowrap shrink-0"
+              title="Export Report"
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200/90 hover:bg-slate-50 rounded-xl shadow-2xs transition-colors whitespace-nowrap shrink-0"
             >
               <Download className="w-3.5 h-3.5 text-slate-500" />
-              <span>Export Report</span>
+              <span className="hidden sm:inline">Export Report</span>
             </button>
           </div>
         </div>

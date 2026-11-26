@@ -60,14 +60,49 @@ export default function HeroControlBar({
   return (
     <div className="relative rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-3.5 shadow-xs overflow-visible space-y-2.5 sm:space-y-3">
       {/* Row 1: Method Selector + Full-Width Target URL Input + Sandbox Shortcut */}
-      <div className="flex items-center gap-2 sm:gap-2.5 w-full">
-        <div className="relative shrink-0">
+      <div className="w-full space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-2.5">
+        {/* On mobile (<sm), Method selector & Sandbox button share a top row so URL input gets 100% width */}
+        <div className="flex sm:hidden items-center justify-between gap-2">
+          <div className="relative">
+            <select
+              aria-label="HTTP Method"
+              disabled={isRunning || config.useHar}
+              value={config.method}
+              onChange={(e) => update('method', e.target.value as HttpMethod)}
+              className={`h-9 pl-3 pr-7 text-xs font-mono font-semibold rounded-xl border appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 transition-colors ${methodPillClasses(
+                config.method
+              )}`}
+            >
+              {METHODS.map((m) => (
+                <option key={m} value={m} className="bg-white text-slate-900">
+                  {m}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-3.5 h-3.5 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 opacity-60" />
+          </div>
+
+          <button
+            type="button"
+            disabled={isRunning}
+            onClick={() => {
+              const origin = typeof window !== 'undefined' ? window.location.origin : '';
+              update('url', `${origin}/api/sandbox/target?delay=18&jitter=12`);
+            }}
+            className="px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+          >
+            Sandbox
+          </button>
+        </div>
+
+        {/* On desktop (>=sm), Method selector is inline with URL */}
+        <div className="hidden sm:block relative shrink-0">
           <select
             aria-label="HTTP Method"
             disabled={isRunning || config.useHar}
             value={config.method}
             onChange={(e) => update('method', e.target.value as HttpMethod)}
-            className={`h-10 sm:h-11 pl-3 sm:pl-3.5 pr-7 sm:pr-8 text-xs font-mono font-semibold rounded-xl border appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 transition-colors ${methodPillClasses(
+            className={`h-11 pl-3.5 pr-8 text-xs font-mono font-semibold rounded-xl border appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 transition-colors ${methodPillClasses(
               config.method
             )}`}
           >
@@ -80,6 +115,7 @@ export default function HeroControlBar({
           <ChevronDown className="w-3.5 h-3.5 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 opacity-60" />
         </div>
 
+        {/* Target URL Input: 100% width on mobile without internal button crowding, flex-1 on desktop */}
         <div className="relative flex-1 min-w-0 flex items-center">
           <input
             type="url"
@@ -88,8 +124,9 @@ export default function HeroControlBar({
             value={config.url}
             onChange={(e) => update('url', e.target.value)}
             placeholder="https://api.example.com/v1/..."
-            className="h-10 sm:h-11 w-full min-w-0 pl-3.5 sm:pl-4 pr-22 sm:pr-24 text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+            className="h-10 sm:h-11 w-full min-w-0 pl-3.5 sm:pl-4 pr-3 sm:pr-24 text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
           />
+          {/* Sandbox shortcut inside input on desktop only */}
           <button
             type="button"
             disabled={isRunning}
@@ -97,7 +134,7 @@ export default function HeroControlBar({
               const origin = typeof window !== 'undefined' ? window.location.origin : '';
               update('url', `${origin}/api/sandbox/target?delay=18&jitter=12`);
             }}
-            className="absolute right-2 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+            className="hidden sm:block absolute right-2 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
           >
             Sandbox
           </button>
