@@ -8,25 +8,28 @@
 
 @layer base {
   :root {
-    --bg-page: #F8FAFC;
+    --bg-page: #FBFBFB;
     --card-surface: #FFFFFF;
     --card-border: rgba(15, 23, 42, 0.08);
     --card-border-hover: rgba(15, 23, 42, 0.16);
-    --frag-surface: #F1F5F9;
+    --frag-surface: #F8FAFC;
     --text-primary: #0F172A;
     --text-muted: #64748B;
+    --accent-coral: #F97316;
+    --accent-warm: #EA580C;
   }
 
   body {
     font-family: var(--font-sans);
-    background-color: #F8FAFC;
+    background-color: #FBFBFB;
     color: #0F172A;
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
     color: #0F172A;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.03em;
   }
 
   button:not(:disabled),
@@ -47,6 +50,32 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Radiant glow horizon backgrounds like tasteskill.dev */
+.bg-radiant-horizon {
+  background: radial-gradient(ellipse 120% 70% at 50% -10%, #FFEDD5 0%, #FFF7ED 35%, #FBFBFB 75%);
+}
+
+.bg-radiant-bottom {
+  background: radial-gradient(ellipse 120% 80% at 50% 100%, #FFEDD5 0%, #FFF7ED 40%, #FBFBFB 85%);
+}
+
+.bg-radiant-vibrant {
+  background: radial-gradient(ellipse 100% 70% at 50% 50%, rgba(249, 115, 22, 0.28) 0%, rgba(254, 215, 170, 0.18) 40%, transparent 80%);
+}
+
+/* Giant watermark in footer */
+.watermark-text {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 14vw, 15rem);
+  font-weight: 900;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  user-select: none;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.08);
+}
+
 
 @media print {
   aside,

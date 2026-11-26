@@ -2,20 +2,20 @@ import React from 'react';
 import type { Metadata } from 'next';
 import LandingNavbar from '@/components/landing/Navbar';
 import HeroSection from '@/components/landing/HeroSection';
-import TrustMetricsBar from '@/components/landing/TrustMetricsBar';
-import FeatureWalkthrough from '@/components/landing/FeatureWalkthrough';
-import BentoFeatures from '@/components/landing/BentoFeatures';
-import ComparisonMatrix from '@/components/landing/ComparisonMatrix';
-import ArchitecturePrivacy from '@/components/landing/ArchitecturePrivacy';
-import FaqAccordion from '@/components/landing/FaqAccordion';
+import EcosystemLogos from '@/components/landing/EcosystemLogos';
+import KineticParadigms from '@/components/landing/KineticParadigms';
+import HowItWorksCards from '@/components/landing/HowItWorksCards';
+import TransformationStepper from '@/components/landing/TransformationStepper';
+import InstallCommandBox from '@/components/landing/InstallCommandBox';
+import DesktopShowcase from '@/components/landing/DesktopShowcase';
+import FaqGrid from '@/components/landing/FaqGrid';
+import RadiantCtaAndFooter from '@/components/landing/RadiantCtaAndFooter';
 import { FAQ_DATA } from '@/lib/faq-data';
-import CtaBanner from '@/components/landing/CtaBanner';
-import LandingFooter from '@/components/landing/Footer';
 
 export const metadata: Metadata = {
-  title: 'CannonBench — The Modern HTTP Load & Stress Testing Workbench',
+  title: 'CannonBench — The Load Testing Workbench for High-Throughput APIs',
   description:
-    'Free, open-source HTTP/1.1 & HTTP/2 load testing workbench powered by Autocannon. Real-time streaming telemetry, p50/p99 latency histograms, automated SLO quality gates, and zero database footprint.',
+    'Dual-engine HTTP load testing streamed in real-time. Run raw TCP Autocannon sockets or high-precision browser fetch timing with instant percentile histograms, cURL auto-import, and automated SLA regression gates.',
   alternates: {
     canonical: '/',
   },
@@ -29,10 +29,10 @@ export default function LandingHomePage() {
       {
         '@type': 'SoftwareApplication',
         name: 'CannonBench',
-        operatingSystem: 'Cross-platform (Web, Node.js, Docker)',
+        operatingSystem: 'Cross-platform (Web, Node.js, Docker, Linux, macOS, Windows)',
         applicationCategory: 'DeveloperApplication',
         description:
-          'Open-source HTTP load and stress testing workbench powered by Autocannon with real-time streaming telemetry and automated SLO quality gates.',
+          'Open-source HTTP load and stress testing workbench powered by Autocannon with real-time streaming telemetry and automated SLA quality gates.',
         license: 'https://opensource.org/licenses/MIT',
         offers: {
           '@type': 'Offer',
@@ -44,7 +44,7 @@ export default function LandingHomePage() {
           '1-second Real-Time Streaming Telemetry (RPS, Latency, Egress)',
           'Smart cURL Auto-Import with URL/Query Sanitization',
           'Multi-Step Request Chaining with JSONPath variable injection',
-          'Automated SLO / SLA Quality Gates and Root-Cause Diagnostics',
+          'Automated SLA Quality Gates and Root-Cause Diagnostics',
           'Logarithmic Binned Latency Histograms (p50 to p99.9)',
           'Zero-Database Architecture with local-only persistence',
         ],
@@ -74,25 +74,45 @@ export default function LandingHomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col selection:bg-indigo-100 selection:text-indigo-950">
-      {/* Inject Structured Data */}
+    <div className="min-h-screen bg-[#FBFBFB] text-[#0F172A] flex flex-col font-sans selection:bg-orange-500 selection:text-white">
+      {/* Search Engine & AI Agent Microdata */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* Top Navbar */}
       <LandingNavbar />
+
+      {/* Main Content Sections */}
       <main className="flex-1">
+        {/* 1. Hero with radiant horizon, preset pills, and interactive workbench */}
         <HeroSection />
-        <TrustMetricsBar />
-        <FeatureWalkthrough />
-        <BentoFeatures />
-        <ComparisonMatrix />
-        <ArchitecturePrivacy />
-        <FaqAccordion />
-        <CtaBanner />
+
+        {/* 2. Ecosystem integration logos */}
+        <EcosystemLogos />
+
+        {/* 3. The Draw: Kinetic paradigms vertical scrubber */}
+        <KineticParadigms />
+
+        {/* 4. How it works: 3 detailed feature cards */}
+        <HowItWorksCards />
+
+        {/* 5. Before and After: 5-stage transformation stepper */}
+        <TransformationStepper />
+
+        {/* 6. Install & Run: Tabbed CLI & CI/CD box */}
+        <InstallCommandBox />
+
+        {/* 7. Desktop & Workbench app showcase card */}
+        <DesktopShowcase />
+
+        {/* 8. Questions: 2-column FAQ grid */}
+        <FaqGrid />
       </main>
-      <LandingFooter />
+
+      {/* 9. Radiant CTA Banner & Dark Footer with Giant Watermark */}
+      <RadiantCtaAndFooter />
     </div>
   );
 }
