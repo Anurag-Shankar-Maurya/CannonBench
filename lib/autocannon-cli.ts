@@ -1,7 +1,10 @@
 import type { BenchmarkConfig, HarRequestEntry } from '@/types/benchmark';
 
 function shellQuote(val: string): string {
-  if (/^[a-zA-Z0-9_./:@=?&%-]+$/.test(val)) {
+  // Characters like '?', '&', '=', ';', spaces, and wildcards are shell operators.
+  // In Bash, Zsh, PowerShell, and CMD, '&' sends processes to the background or chains commands,
+  // and '?' acts as a wildcard glob. URLs with query strings MUST always be enclosed in quotes.
+  if (/^[a-zA-Z0-9_./:-]+$/.test(val)) {
     return val;
   }
   return `'${val.replace(/'/g, `'\\''`)}'`;
