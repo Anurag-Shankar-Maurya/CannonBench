@@ -194,7 +194,7 @@ export default function RequestOptionsAccordion({
             className="overflow-hidden border-t border-slate-200/80"
           >
             {/* Tabs Navigation */}
-            <div className="px-5 bg-slate-50/60 border-b border-slate-200/80 flex items-center gap-6 overflow-x-auto">
+            <div className="px-4 sm:px-5 bg-slate-50/60 border-b border-slate-200/80 flex items-center gap-3 sm:gap-6 overflow-x-auto scrollbar-none">
               {tabs.map((tab) => {
                 const active = activeTab === tab.id;
                 return (
@@ -204,7 +204,7 @@ export default function RequestOptionsAccordion({
                     onClick={() => setActiveTab(tab.id)}
                     className={`py-3 text-xs font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 ${
                       active
-                        ? 'border-indigo-600 text-indigo-600'
+                        ? 'border-indigo-600 text-indigo-600 font-semibold'
                         : 'border-transparent text-slate-500 hover:text-slate-900'
                     }`}
                   >
@@ -215,13 +215,13 @@ export default function RequestOptionsAccordion({
             </div>
 
             {/* Tab Content */}
-            <div className="p-6 space-y-5">
+            <div className="p-4 sm:p-6 space-y-5">
               {activeTab === 'headers' && (
                 <div className="space-y-4">
                   {/* Auth Quick Helper */}
                   <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-wrap items-center gap-2.5">
                     <KeyRound className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span className="text-xs font-medium text-slate-700 whitespace-nowrap">
+                    <span className="text-xs font-medium text-slate-700 whitespace-nowrap shrink-0">
                       Quick Auth
                     </span>
                     <select
@@ -229,7 +229,7 @@ export default function RequestOptionsAccordion({
                       onChange={(e) =>
                         setAuthType(e.target.value as 'bearer' | 'apikey' | 'basic' | 'cookie')
                       }
-                      className="h-8 px-2.5 text-xs bg-white border border-slate-200 rounded-lg"
+                      className="h-8 px-2.5 text-xs bg-white border border-slate-200 rounded-lg shrink-0"
                     >
                       <option value="bearer">Bearer JWT</option>
                       <option value="apikey">API Key Header</option>
@@ -242,7 +242,7 @@ export default function RequestOptionsAccordion({
                         value={authKeyName}
                         onChange={(e) => setAuthKeyName(e.target.value)}
                         placeholder="X-API-Key"
-                        className="h-8 w-32 px-2.5 text-xs font-mono bg-white border border-slate-200 rounded-lg"
+                        className="h-8 w-28 sm:w-32 min-w-0 px-2.5 text-xs font-mono bg-white border border-slate-200 rounded-lg shrink-0"
                       />
                     )}
                     <input
@@ -256,7 +256,7 @@ export default function RequestOptionsAccordion({
                             ? 'sid=abc123'
                             : 'Paste token or API key...'
                       }
-                      className="h-8 flex-1 min-w-[200px] px-3 text-xs font-mono bg-white border border-slate-200 rounded-lg"
+                      className="h-8 flex-1 min-w-[160px] sm:min-w-[200px] px-3 text-xs font-mono bg-white border border-slate-200 rounded-lg"
                     />
                     <button
                       type="button"
@@ -270,7 +270,7 @@ export default function RequestOptionsAccordion({
                   {/* Key-Value Rows */}
                   <div className="space-y-2">
                     {config.headers.map((header, idx) => (
-                      <div key={header.id} className="flex items-center gap-2.5">
+                      <div key={header.id} className="flex items-center gap-2 sm:gap-2.5 w-full">
                         <input
                           type="checkbox"
                           checked={header.enabled}
@@ -279,7 +279,7 @@ export default function RequestOptionsAccordion({
                             next[idx] = { ...header, enabled: e.target.checked };
                             update('headers', next);
                           }}
-                          className="rounded border-slate-300 text-indigo-600"
+                          className="rounded border-slate-300 text-indigo-600 shrink-0"
                         />
                         <input
                           type="text"
@@ -290,7 +290,7 @@ export default function RequestOptionsAccordion({
                             update('headers', next);
                           }}
                           placeholder="Header name"
-                          className="w-1/3 h-9 px-3 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                          className="w-1/3 min-w-0 h-9 px-3 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
                         />
                         <input
                           type="text"
@@ -301,7 +301,7 @@ export default function RequestOptionsAccordion({
                             update('headers', next);
                           }}
                           placeholder="Value (supports {{$uuid}}, {{$timestamp}})"
-                          className="flex-1 h-9 px-3 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
+                          className="flex-1 min-w-0 h-9 px-3 text-xs font-mono border border-slate-200 rounded-lg focus:outline-none focus:border-indigo-500"
                         />
                         <button
                           type="button"
@@ -312,7 +312,7 @@ export default function RequestOptionsAccordion({
                               config.headers.filter((h) => h.id !== header.id)
                             )
                           }
-                          className="p-2 text-slate-400 hover:text-rose-600 transition-colors"
+                          className="p-2 text-slate-400 hover:text-rose-600 transition-colors shrink-0"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

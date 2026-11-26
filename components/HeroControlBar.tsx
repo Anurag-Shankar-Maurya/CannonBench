@@ -58,8 +58,9 @@ export default function HeroControlBar({
   };
 
   return (
-    <div className="relative rounded-2xl border border-slate-200/90 bg-white p-3 shadow-xs overflow-visible">
-      <div className="flex flex-col xl:flex-row xl:items-center gap-3">
+    <div className="relative rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs overflow-visible space-y-3">
+      {/* Row 1: Method Selector + Full-Width Target URL Input + Start Benchmark CTA (Desktop) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full">
         {/* Method + URL Input */}
         <div className="flex items-center gap-2.5 flex-1 min-w-0">
           <div className="relative shrink-0">
@@ -105,8 +106,39 @@ export default function HeroControlBar({
           </div>
         </div>
 
-        {/* Concurrency + Duration + Start CTA */}
-        <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
+        {/* Primary CTA on Desktop / Tablet (Row 1 right) */}
+        <div className="hidden sm:block shrink-0">
+          {isRunning ? (
+            <button
+              type="button"
+              onClick={onStop}
+              className="h-11 px-5 lg:px-6 inline-flex items-center justify-center gap-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors whitespace-nowrap"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+              <span>Stop Test</span>
+              <span className="font-mono tabular-nums text-[11px] bg-rose-700/80 px-2 py-0.5 rounded-md">
+                {remainingSec}s
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onStart}
+              className="h-11 px-5 lg:px-6 inline-flex items-center justify-center gap-2 text-xs font-semibold text-white bg-[#0F172A] hover:bg-slate-800 rounded-xl shadow-xs transition-colors whitespace-nowrap group"
+            >
+              <Play className="w-3.5 h-3.5 fill-current text-indigo-400 group-hover:text-indigo-300 transition-colors" />
+              <span>Start Benchmark</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-300 bg-slate-800 border border-slate-700 rounded">
+                ⌘↵
+              </kbd>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Row 2: Concurrency + Duration + Engine Mode (+ Primary CTA on Mobile) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-slate-100/90">
+        <div className="flex flex-wrap items-center gap-2.5 min-w-0">
           {/* Concurrency Preset Selector + Custom Slider Popover */}
           <div className="relative flex items-center gap-1 p-1 bg-slate-100/80 border border-slate-200/60 rounded-xl">
             <span className="px-2 text-[11px] font-medium text-slate-500 whitespace-nowrap">
@@ -131,7 +163,7 @@ export default function HeroControlBar({
                   }
                   className={`px-2.5 py-1.5 text-xs font-mono tabular-nums font-medium rounded-lg transition-all whitespace-nowrap shrink-0 ${
                     active
-                      ? 'bg-white text-slate-900 shadow-xs'
+                      ? 'bg-white text-slate-900 shadow-xs font-semibold'
                       : 'text-slate-600 hover:text-slate-900'
                   } disabled:opacity-50`}
                 >
@@ -157,7 +189,7 @@ export default function HeroControlBar({
             </button>
 
             {showCustomConn && (
-              <div className="absolute right-0 top-full mt-2 z-30 w-64 p-4 bg-white border border-slate-200 rounded-xl shadow-lg space-y-2">
+              <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 z-30 w-64 p-4 bg-white border border-slate-200 rounded-xl shadow-lg space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-medium text-slate-700">Custom Connections</span>
                   <span className="font-mono tabular-nums font-semibold text-slate-900">
@@ -218,7 +250,7 @@ export default function HeroControlBar({
                   }
                   className={`px-2.5 py-1.5 text-xs font-mono tabular-nums font-medium rounded-lg transition-all whitespace-nowrap shrink-0 ${
                     active
-                      ? 'bg-white text-slate-900 shadow-xs'
+                      ? 'bg-white text-slate-900 shadow-xs font-semibold'
                       : 'text-slate-600 hover:text-slate-900'
                   } disabled:opacity-50`}
                 >
@@ -262,20 +294,22 @@ export default function HeroControlBar({
             {config.engineMode === 'browser' && config.connections > 6 && (
               <span
                 title="Browsers enforce a hard limit of 6 simultaneous TCP connections per host for HTTP/1.1. Concurrency > 6 causes browser queueing delay. Switch to Native for full raw socket concurrency."
-                className="hidden xl:inline-flex items-center gap-1 text-[10px] text-amber-700 font-medium bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md shrink-0 cursor-help"
+                className="hidden lg:inline-flex items-center gap-1 text-[10px] text-amber-700 font-medium bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md shrink-0 cursor-help"
               >
                 <AlertCircle className="w-3 h-3 text-amber-600" />
                 Browser 6-conn cap
               </span>
             )}
           </div>
+        </div>
 
-          {/* Primary CTA: Start Benchmark or Stop Test with Countdown */}
+        {/* Primary CTA on Mobile Viewports (<640px) */}
+        <div className="sm:hidden shrink-0 w-full pt-1">
           {isRunning ? (
             <button
               type="button"
               onClick={onStop}
-              className="h-11 px-5 inline-flex items-center justify-center gap-2.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors whitespace-nowrap shrink-0"
+              className="w-full h-11 px-6 inline-flex items-center justify-center gap-2.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors whitespace-nowrap"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
               <span>Stop Test</span>
@@ -287,13 +321,10 @@ export default function HeroControlBar({
             <button
               type="button"
               onClick={onStart}
-              className="h-11 px-5 inline-flex items-center justify-center gap-2.5 text-xs font-semibold text-white bg-[#0F172A] hover:bg-slate-800 rounded-xl shadow-xs transition-colors whitespace-nowrap shrink-0"
+              className="w-full h-11 px-6 inline-flex items-center justify-center gap-2.5 text-xs font-semibold text-white bg-[#0F172A] hover:bg-slate-800 rounded-xl shadow-xs transition-colors whitespace-nowrap group"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
+              <Play className="w-3.5 h-3.5 fill-current text-indigo-400 group-hover:text-indigo-300 transition-colors" />
               <span>Start Benchmark</span>
-              <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-300 bg-slate-800 border border-slate-700 rounded">
-                ⌘↵
-              </kbd>
             </button>
           )}
         </div>
