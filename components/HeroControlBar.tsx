@@ -58,90 +58,58 @@ export default function HeroControlBar({
   };
 
   return (
-    <div className="relative rounded-2xl border border-slate-200/90 bg-white p-3.5 shadow-xs overflow-visible space-y-3">
-      {/* Row 1: Method Selector + Full-Width Target URL Input + Start Benchmark CTA (Desktop) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full">
-        {/* Method + URL Input */}
-        <div className="flex items-center gap-2.5 flex-1 min-w-0">
-          <div className="relative shrink-0">
-            <select
-              aria-label="HTTP Method"
-              disabled={isRunning || config.useHar}
-              value={config.method}
-              onChange={(e) => update('method', e.target.value as HttpMethod)}
-              className={`h-11 pl-3.5 pr-8 text-xs font-mono font-semibold rounded-xl border appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 transition-colors ${methodPillClasses(
-                config.method
-              )}`}
-            >
-              {METHODS.map((m) => (
-                <option key={m} value={m} className="bg-white text-slate-900">
-                  {m}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="w-3.5 h-3.5 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 opacity-60" />
-          </div>
-
-          <div className="relative flex-1 min-w-0 flex items-center">
-            <input
-              type="url"
-              aria-label="Target URL"
-              disabled={isRunning}
-              value={config.url}
-              onChange={(e) => update('url', e.target.value)}
-              placeholder="https://api.example.com/v1/..."
-              className="h-11 w-full min-w-0 pl-4 pr-24 text-sm font-mono text-slate-900 placeholder:text-slate-400 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
-            />
-            <button
-              type="button"
-              disabled={isRunning}
-              onClick={() => {
-                const origin = typeof window !== 'undefined' ? window.location.origin : '';
-                update('url', `${origin}/api/sandbox/target?delay=18&jitter=12`);
-              }}
-              className="absolute right-2 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
-            >
-              Sandbox
-            </button>
-          </div>
+    <div className="relative rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-3.5 shadow-xs overflow-visible space-y-2.5 sm:space-y-3">
+      {/* Row 1: Method Selector + Full-Width Target URL Input + Sandbox Shortcut */}
+      <div className="flex items-center gap-2 sm:gap-2.5 w-full">
+        <div className="relative shrink-0">
+          <select
+            aria-label="HTTP Method"
+            disabled={isRunning || config.useHar}
+            value={config.method}
+            onChange={(e) => update('method', e.target.value as HttpMethod)}
+            className={`h-10 sm:h-11 pl-3 sm:pl-3.5 pr-7 sm:pr-8 text-xs font-mono font-semibold rounded-xl border appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 transition-colors ${methodPillClasses(
+              config.method
+            )}`}
+          >
+            {METHODS.map((m) => (
+              <option key={m} value={m} className="bg-white text-slate-900">
+                {m}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="w-3.5 h-3.5 pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 opacity-60" />
         </div>
 
-        {/* Primary CTA on Desktop / Tablet (Row 1 right) */}
-        <div className="hidden sm:block shrink-0">
-          {isRunning ? (
-            <button
-              type="button"
-              onClick={onStop}
-              className="h-11 px-5 lg:px-6 inline-flex items-center justify-center gap-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors whitespace-nowrap"
-            >
-              <Square className="w-3.5 h-3.5 fill-current" />
-              <span>Stop Test</span>
-              <span className="font-mono tabular-nums text-[11px] bg-rose-700/80 px-2 py-0.5 rounded-md">
-                {remainingSec}s
-              </span>
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onStart}
-              className="h-11 px-5 lg:px-6 inline-flex items-center justify-center gap-2 text-xs font-semibold text-white bg-[#0F172A] hover:bg-slate-800 rounded-xl shadow-xs transition-colors whitespace-nowrap group"
-            >
-              <Play className="w-3.5 h-3.5 fill-current text-indigo-400 group-hover:text-indigo-300 transition-colors" />
-              <span>Start Benchmark</span>
-              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-300 bg-slate-800 border border-slate-700 rounded">
-                ⌘↵
-              </kbd>
-            </button>
-          )}
+        <div className="relative flex-1 min-w-0 flex items-center">
+          <input
+            type="url"
+            aria-label="Target URL"
+            disabled={isRunning}
+            value={config.url}
+            onChange={(e) => update('url', e.target.value)}
+            placeholder="https://api.example.com/v1/..."
+            className="h-10 sm:h-11 w-full min-w-0 pl-3.5 sm:pl-4 pr-22 sm:pr-24 text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+          />
+          <button
+            type="button"
+            disabled={isRunning}
+            onClick={() => {
+              const origin = typeof window !== 'undefined' ? window.location.origin : '';
+              update('url', `${origin}/api/sandbox/target?delay=18&jitter=12`);
+            }}
+            className="absolute right-2 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+          >
+            Sandbox
+          </button>
         </div>
       </div>
 
-      {/* Row 2: Concurrency + Duration + Engine Mode (+ Primary CTA on Mobile) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2.5 border-t border-slate-100/90">
-        <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+      {/* Row 2: Concurrency + Duration + Engine Mode + Start Benchmark CTA */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2 sm:pt-2.5 border-t border-slate-100/90">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
           {/* Concurrency Preset Selector + Custom Slider Popover */}
-          <div className="relative flex items-center gap-1 p-1 bg-slate-100/80 border border-slate-200/60 rounded-xl">
-            <span className="px-2 text-[11px] font-medium text-slate-500 whitespace-nowrap">
+          <div className="relative flex items-center gap-0.5 p-1 bg-slate-100/80 border border-slate-200/60 rounded-xl">
+            <span className="px-1.5 text-[11px] font-medium text-slate-500 whitespace-nowrap">
               Conn
             </span>
             {CONCURRENCY_OPTIONS.map((c) => {
@@ -161,7 +129,7 @@ export default function HeroControlBar({
                       connections: c,
                     })
                   }
-                  className={`px-2.5 py-1.5 text-xs font-mono tabular-nums font-medium rounded-lg transition-all whitespace-nowrap shrink-0 ${
+                  className={`px-2 py-1 text-xs font-mono tabular-nums font-medium rounded-lg transition-all whitespace-nowrap shrink-0 ${
                     active
                       ? 'bg-white text-slate-900 shadow-xs font-semibold'
                       : 'text-slate-600 hover:text-slate-900'
@@ -176,7 +144,7 @@ export default function HeroControlBar({
               disabled={isRunning}
               onClick={() => setShowCustomConn((v) => !v)}
               aria-label="Custom concurrency slider"
-              className={`px-2 py-1.5 text-xs font-mono rounded-lg transition-colors inline-flex items-center gap-1 whitespace-nowrap shrink-0 ${
+              className={`px-1.5 py-1 text-xs font-mono rounded-lg transition-colors inline-flex items-center gap-1 whitespace-nowrap shrink-0 ${
                 !CONCURRENCY_OPTIONS.includes(config.connections)
                   ? 'bg-white text-indigo-600 shadow-xs font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
@@ -228,7 +196,7 @@ export default function HeroControlBar({
           </div>
 
           {/* Duration Preset Selector */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100/80 border border-slate-200/60 rounded-xl">
+          <div className="flex items-center gap-0.5 p-1 bg-slate-100/80 border border-slate-200/60 rounded-xl">
             {DURATION_OPTIONS.map((d) => {
               const active =
                 config.duration === d &&
@@ -248,7 +216,7 @@ export default function HeroControlBar({
                       duration: d,
                     })
                   }
-                  className={`px-2.5 py-1.5 text-xs font-mono tabular-nums font-medium rounded-lg transition-all whitespace-nowrap shrink-0 ${
+                  className={`px-2 py-1 text-xs font-mono tabular-nums font-medium rounded-lg transition-all whitespace-nowrap shrink-0 ${
                     active
                       ? 'bg-white text-slate-900 shadow-xs font-semibold'
                       : 'text-slate-600 hover:text-slate-900'
@@ -261,13 +229,13 @@ export default function HeroControlBar({
           </div>
 
           {/* Engine Mode Toggle: Native Node.js Autocannon vs Browser Edge */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100/80 border border-slate-200/60 rounded-xl relative group">
+          <div className="flex items-center gap-0.5 p-1 bg-slate-100/80 border border-slate-200/60 rounded-xl relative group">
             <button
               type="button"
               disabled={isRunning}
               onClick={() => update('engineMode', 'native')}
               title="Native Node.js Autocannon Engine: Raw TCP sockets, 100% terminal parity with npx autocannon (supports 25-500 connections, bypasses browser 6-socket limit)"
-              className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`px-2 py-1 text-xs font-medium rounded-lg transition-all inline-flex items-center gap-1 whitespace-nowrap shrink-0 ${
                 config.engineMode !== 'browser'
                   ? 'bg-white text-indigo-700 shadow-xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -281,7 +249,7 @@ export default function HeroControlBar({
               disabled={isRunning}
               onClick={() => update('engineMode', 'browser')}
               title="Browser Edge Engine: Client-side fetch() without server (HTTP/1.1 capped at 6 concurrent connections per host by browser)"
-              className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`px-2 py-1 text-xs font-medium rounded-lg transition-all inline-flex items-center gap-1 whitespace-nowrap shrink-0 ${
                 config.engineMode === 'browser'
                   ? 'bg-white text-indigo-700 shadow-xs font-semibold'
                   : 'text-slate-600 hover:text-slate-900'
@@ -303,13 +271,13 @@ export default function HeroControlBar({
           </div>
         </div>
 
-        {/* Primary CTA on Mobile Viewports (<640px) */}
-        <div className="sm:hidden shrink-0 w-full pt-1">
+        {/* Primary CTA: Start Benchmark or Stop Test with Countdown */}
+        <div className="shrink-0 w-full sm:w-auto">
           {isRunning ? (
             <button
               type="button"
               onClick={onStop}
-              className="w-full h-11 px-6 inline-flex items-center justify-center gap-2.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors whitespace-nowrap"
+              className="w-full sm:w-auto h-9 sm:h-10 px-4 sm:px-5 inline-flex items-center justify-center gap-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition-colors whitespace-nowrap"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
               <span>Stop Test</span>
@@ -321,10 +289,13 @@ export default function HeroControlBar({
             <button
               type="button"
               onClick={onStart}
-              className="w-full h-11 px-6 inline-flex items-center justify-center gap-2.5 text-xs font-semibold text-white bg-[#0F172A] hover:bg-slate-800 rounded-xl shadow-xs transition-colors whitespace-nowrap group"
+              className="w-full sm:w-auto h-9 sm:h-10 px-4 sm:px-5 inline-flex items-center justify-center gap-2 text-xs font-semibold text-white bg-[#0F172A] hover:bg-slate-800 rounded-xl shadow-xs transition-colors whitespace-nowrap group"
             >
               <Play className="w-3.5 h-3.5 fill-current text-indigo-400 group-hover:text-indigo-300 transition-colors" />
               <span>Start Benchmark</span>
+              <kbd className="hidden lg:inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-300 bg-slate-800 border border-slate-700 rounded">
+                ⌘↵
+              </kbd>
             </button>
           )}
         </div>

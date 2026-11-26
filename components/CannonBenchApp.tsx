@@ -408,7 +408,7 @@ export default function CannonBenchApp() {
       </header>
 
       {/* Main Spacious Canvas */}
-      <main className="flex-1 max-w-[1360px] w-full mx-auto px-6 sm:px-8 py-6 sm:py-8 space-y-6">
+      <main className="flex-1 max-w-[1360px] w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-5">
         {errorBanner && (
           <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between gap-4 text-xs text-rose-800">
             <span>{errorBanner}</span>
