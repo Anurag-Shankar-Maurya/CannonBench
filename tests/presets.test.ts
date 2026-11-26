@@ -16,6 +16,7 @@ describe('Presets & Configuration', () => {
     expect(config.sloMaxErrorPct).toBe(1);
     expect(config.sloMaxP99Ms).toBe(250);
     expect(config.sloMinRps).toBe(50);
+    expect(config.engineMode).toBe('native');
   });
 
   it('provides built-in presets covering multiple patterns', () => {

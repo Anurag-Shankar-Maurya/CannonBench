@@ -252,7 +252,21 @@ export class BrowserLoadRunner {
               signal: combinedSignal,
             });
             clearTimeout(timer);
-            const duration = performance.now() - t0;
+            let duration = performance.now() - t0;
+            if (typeof performance !== 'undefined' && typeof performance.getEntriesByName === 'function') {
+              try {
+                const entries = performance.getEntriesByName(targetUrl);
+                const lastEntry = entries[entries.length - 1] as PerformanceResourceTiming | undefined;
+                if (lastEntry && lastEntry.responseEnd > 0 && lastEntry.requestStart > 0) {
+                  const netDuration = lastEntry.responseEnd - lastEntry.requestStart;
+                  if (netDuration > 0 && netDuration < duration) {
+                    duration = netDuration;
+                  }
+                }
+              } catch {
+                // fallback to performance.now()
+              }
+            }
             const text = await resp.text();
             const bytes = text.length;
 

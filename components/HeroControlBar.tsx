@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown, Play, SlidersHorizontal, Square } from 'lucide-react';
+import { AlertCircle, ChevronDown, Globe, Play, SlidersHorizontal, Square, Zap } from 'lucide-react';
 import type { BenchmarkConfig, HttpMethod } from '@/types/benchmark';
 
 interface HeroControlBarProps {
@@ -226,6 +226,48 @@ export default function HeroControlBar({
                 </button>
               );
             })}
+          </div>
+
+          {/* Engine Mode Toggle: Native Node.js Autocannon vs Browser Edge */}
+          <div className="flex items-center gap-1 p-1 bg-slate-100/80 border border-slate-200/60 rounded-xl relative group">
+            <button
+              type="button"
+              disabled={isRunning}
+              onClick={() => update('engineMode', 'native')}
+              title="Native Node.js Autocannon Engine: Raw TCP sockets, 100% terminal parity with npx autocannon (supports 25-500 connections, bypasses browser 6-socket limit)"
+              className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                config.engineMode !== 'browser'
+                  ? 'bg-white text-indigo-700 shadow-xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              } disabled:opacity-50`}
+            >
+              <Zap className="w-3.5 h-3.5 text-indigo-600 fill-indigo-600" />
+              <span>Native</span>
+            </button>
+            <button
+              type="button"
+              disabled={isRunning}
+              onClick={() => update('engineMode', 'browser')}
+              title="Browser Edge Engine: Client-side fetch() without server (HTTP/1.1 capped at 6 concurrent connections per host by browser)"
+              className={`px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+                config.engineMode === 'browser'
+                  ? 'bg-white text-indigo-700 shadow-xs font-semibold'
+                  : 'text-slate-600 hover:text-slate-900'
+              } disabled:opacity-50`}
+            >
+              <Globe className="w-3.5 h-3.5 text-slate-500" />
+              <span>Browser</span>
+            </button>
+
+            {config.engineMode === 'browser' && config.connections > 6 && (
+              <span
+                title="Browsers enforce a hard limit of 6 simultaneous TCP connections per host for HTTP/1.1. Concurrency > 6 causes browser queueing delay. Switch to Native for full raw socket concurrency."
+                className="hidden xl:inline-flex items-center gap-1 text-[10px] text-amber-700 font-medium bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md shrink-0 cursor-help"
+              >
+                <AlertCircle className="w-3 h-3 text-amber-600" />
+                Browser 6-conn cap
+              </span>
+            )}
           </div>
 
           {/* Primary CTA: Start Benchmark or Stop Test with Countdown */}

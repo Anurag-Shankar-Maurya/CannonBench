@@ -110,6 +110,7 @@ export interface BenchmarkConfig {
   corsProxyUrl?: string;
   enableChaining?: boolean;
   chainedSteps?: ChainedStep[];
+  engineMode?: 'native' | 'browser';
 }
 
 export interface LatencyHistogramBucket {

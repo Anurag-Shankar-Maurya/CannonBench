@@ -45,6 +45,7 @@ export default function CannonBenchApp() {
   const [exportOpen, setExportOpen] = useState(false);
 
   const runnerRef = useRef<BrowserLoadRunner | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const notify = useCallback((msg: string) => {
@@ -101,12 +102,20 @@ export default function CannonBenchApp() {
     return idx >= 0 && runs[idx + 1] ? runs[idx + 1] : null;
   }, [runs, selectedRun]);
 
-  const handleStopBenchmark = useCallback(() => {
+  const handleStopBenchmark = useCallback(async () => {
     if (!isRunning) return;
+    if (activeRunId) {
+      fetch('/api/benchmark/stop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runId: activeRunId }),
+      }).catch(() => {});
+    }
+    abortControllerRef.current?.abort();
     runnerRef.current?.stop();
     setIsRunning(false);
     notify('Stopping benchmark...');
-  }, [isRunning, notify]);
+  }, [isRunning, activeRunId, notify]);
 
   const executeBenchmark = useCallback(
     async (overrideConfig?: BenchmarkConfig) => {
@@ -123,49 +132,202 @@ export default function CannonBenchApp() {
       setActiveStageLabel('');
       setIsRunning(true);
 
-      const runner = new BrowserLoadRunner();
-      runnerRef.current = runner;
+      const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      setActiveRunId(runId);
 
-      const collectedTicks: TickSample[] = [];
+      const isBrowserMode = snapshotConfig.engineMode === 'browser' || Boolean(snapshotConfig.enableChaining);
 
-      try {
-        await runner.run(snapshotConfig, {
-          onStart: ({ runId: id }) => {
-            setActiveRunId(id);
-          },
-          onStage: ({ label }) => {
-            setActiveStageLabel(label);
-          },
-          onTick: (tick) => {
-            collectedTicks.push(tick);
-            setLiveTicks([...collectedTicks]);
-            setElapsedSec(tick.elapsedSec);
-          },
-          onDone: (record) => {
-            setSelectedRun(record);
-            setRuns((prev) => {
-              const next = [record, ...prev];
-              saveStoredRuns(next);
-              return next;
-            });
-            setIsRunning(false);
-            setActiveRunId(null);
-            notify('Benchmark completed!');
-          },
-          onError: (errMsg) => {
-            setErrorBanner(errMsg);
-            setIsRunning(false);
-            setActiveRunId(null);
-          },
-        });
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          notify('Benchmark stopped');
-        } else {
-          setErrorBanner(err instanceof Error ? err.message : 'Unable to execute benchmark.');
+      if (isBrowserMode) {
+        const runner = new BrowserLoadRunner();
+        runnerRef.current = runner;
+        const collectedTicks: TickSample[] = [];
+
+        try {
+          await runner.run(snapshotConfig, {
+            onStart: ({ runId: id }) => {
+              setActiveRunId(id);
+            },
+            onStage: ({ label }) => {
+              setActiveStageLabel(label);
+            },
+            onTick: (tick) => {
+              collectedTicks.push(tick);
+              setLiveTicks([...collectedTicks]);
+              setElapsedSec(tick.elapsedSec);
+            },
+            onDone: (record) => {
+              setSelectedRun(record);
+              setRuns((prev) => {
+                const next = [record, ...prev];
+                saveStoredRuns(next);
+                return next;
+              });
+              setIsRunning(false);
+              setActiveRunId(null);
+              notify('Benchmark completed!');
+            },
+            onError: (errMsg) => {
+              setErrorBanner(errMsg);
+              setIsRunning(false);
+              setActiveRunId(null);
+            },
+          });
+        } catch (err) {
+          if (err instanceof Error && err.name === 'AbortError') {
+            notify('Benchmark stopped');
+          } else {
+            setErrorBanner(err instanceof Error ? err.message : 'Unable to execute benchmark.');
+          }
+          setIsRunning(false);
+          setActiveRunId(null);
         }
-        setIsRunning(false);
-        setActiveRunId(null);
+      } else {
+        // Native Node.js Autocannon Engine (100% Terminal Parity via Raw Sockets)
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
+        const collectedTicks: TickSample[] = [];
+
+        try {
+          const response = await fetch('/api/benchmark', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            signal: controller.signal,
+            body: JSON.stringify({
+              runId,
+              title: snapshotConfig.title,
+              url: snapshotConfig.url,
+              method: snapshotConfig.method,
+              pattern: snapshotConfig.pattern,
+              connections: snapshotConfig.connections,
+              duration: snapshotConfig.duration,
+              amount: snapshotConfig.amount ?? null,
+              pipelining: snapshotConfig.pipelining,
+              workers: snapshotConfig.workers,
+              timeout: snapshotConfig.timeout,
+              sampleInt: snapshotConfig.sampleInt,
+              overallRate: snapshotConfig.overallRate ?? null,
+              connectionRate: snapshotConfig.connectionRate ?? null,
+              ignoreCoordinatedOmission: snapshotConfig.ignoreCoordinatedOmission,
+              bailout: snapshotConfig.bailout ?? null,
+              maxConnectionRequests: snapshotConfig.maxConnectionRequests ?? null,
+              maxOverallRequests: snapshotConfig.maxOverallRequests ?? null,
+              reconnectRate: snapshotConfig.reconnectRate ?? null,
+              excludeErrorStats: snapshotConfig.excludeErrorStats,
+              idReplacement: snapshotConfig.idReplacement,
+              expectBody: snapshotConfig.expectBody,
+              servername: snapshotConfig.servername,
+              warmupEnabled: snapshotConfig.warmupEnabled,
+              warmupConnections: snapshotConfig.warmupConnections,
+              warmupDuration: snapshotConfig.warmupDuration,
+              headers: snapshotConfig.headers,
+              bodyMode: snapshotConfig.bodyMode,
+              body: snapshotConfig.body,
+              contentType: snapshotConfig.contentType,
+              formFields: snapshotConfig.formFields,
+              useHar: snapshotConfig.useHar,
+              harRaw: snapshotConfig.harRaw ?? null,
+              rampConfig: snapshotConfig.rampConfig,
+              spikeConfig: snapshotConfig.spikeConfig,
+            }),
+          });
+
+          if (!response.ok) {
+            const errData = (await response.json().catch(() => ({}))) as { error?: string };
+            throw new Error(errData.error || `Server rejected benchmark (${response.status})`);
+          }
+
+          if (!response.body) {
+            throw new Error('Streaming response body unavailable.');
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          const processBlock = (block: string) => {
+            const lines = block.split('\n');
+            let eventName = 'message';
+            const dataLines: string[] = [];
+
+            for (const line of lines) {
+              if (line.startsWith('event:')) {
+                eventName = line.slice(6).trim();
+              } else if (line.startsWith('data:')) {
+                dataLines.push(line.slice(5).trim());
+              }
+            }
+
+            if (dataLines.length === 0) return;
+            const payload = JSON.parse(dataLines.join('\n'));
+
+            if (eventName === 'stage') {
+              setActiveStageLabel(String(payload.label || ''));
+            } else if (eventName === 'worker_heartbeat') {
+              setElapsedSec(Number(payload.elapsedSec || 0));
+              setActiveStageLabel(String(payload.stageLabel || ''));
+            } else if (eventName === 'tick') {
+              const tick = payload as TickSample;
+              collectedTicks.push(tick);
+              setLiveTicks([...collectedTicks]);
+              setElapsedSec(tick.elapsedSec);
+            } else if (eventName === 'error') {
+              setErrorBanner(String(payload.message || 'Benchmark execution failed.'));
+            } else if (eventName === 'done') {
+              const finalStatus = payload.status as BenchmarkRunRecord['status'];
+              const summary = payload.result as AutocannonResultSummary;
+              const apdexScore = computeApdexScore(summary, snapshotConfig.sloTargetLatencyMs);
+              const diagnostics = analyzeBottlenecks(summary, snapshotConfig, finalStatus);
+
+              const record: BenchmarkRunRecord = {
+                id: runId,
+                title: snapshotConfig.title.trim() || 'Benchmark Run',
+                createdAt: new Date().toISOString(),
+                status: finalStatus,
+                config: snapshotConfig,
+                ticks: collectedTicks,
+                result: summary,
+                apdexScore,
+                diagnostics,
+                cliCommand: buildAutocannonCliCommand(snapshotConfig),
+                sloStatus: summary.sloStatus,
+                sloBreaches: summary.sloBreaches,
+              };
+
+              setSelectedRun(record);
+              setRuns((prev) => {
+                const next = [record, ...prev];
+                saveStoredRuns(next);
+                return next;
+              });
+              notify('Benchmark completed!');
+            }
+          };
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const parts = buffer.split('\n\n');
+            buffer = parts.pop() ?? '';
+            for (const part of parts) {
+              if (part.trim()) processBlock(part);
+            }
+          }
+
+          if (buffer.trim()) {
+            processBlock(buffer);
+          }
+        } catch (err) {
+          if (err instanceof Error && err.name === 'AbortError') {
+            notify('Benchmark stopped');
+          } else {
+            setErrorBanner(err instanceof Error ? err.message : 'Unable to execute benchmark.');
+          }
+        } finally {
+          setIsRunning(false);
+          setActiveRunId(null);
+          abortControllerRef.current = null;
+        }
       }
     },
     [config, isRunning, notify]

@@ -4,6 +4,7 @@ import autocannon, { type AutocannonOptions } from 'autocannon';
 import { validateBenchmarkTargetUrl } from '@/lib/url-guard';
 import { registerActiveRun, unregisterActiveRun } from '@/lib/benchmark-registry';
 import { resolveDynamicVariables } from '@/lib/autocannon-cli';
+import { buildLatencyHistogram, evaluateSloThresholds } from '@/lib/diagnostics';
 import type { AutocannonResultSummary, TickSample } from '@/types/benchmark';
 
 export const runtime = 'nodejs';
@@ -726,6 +727,23 @@ export async function POST(req: NextRequest) {
 
         if (stageOutputs.length > 0) {
           const combined = combineStageResults(stageOutputs, guarded.displayUrl);
+          const estimatedLatencies = [
+            combined.latency.p1,
+            combined.latency.p2_5,
+            combined.latency.p10 ?? combined.latency.p50,
+            combined.latency.p50,
+            combined.latency.p75,
+            combined.latency.p90,
+            combined.latency.p97_5,
+            combined.latency.p99,
+            combined.latency.p99_9,
+            combined.latency.max,
+          ];
+          combined.histogram = buildLatencyHistogram(estimatedLatencies);
+          const sloEval = evaluateSloThresholds(combined, input as any);
+          combined.sloStatus = sloEval.status;
+          combined.sloBreaches = sloEval.breaches;
+
           sendEvent('done', {
             status: bailedOut ? 'bailed_out' : aborted ? 'aborted' : 'completed',
             result: combined,

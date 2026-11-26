@@ -70,6 +70,7 @@ export function createDefaultBenchmarkConfig(origin = ''): BenchmarkConfig {
     corsProxyUrl: '',
     enableChaining: false,
     chainedSteps: [],
+    engineMode: 'native',
   };
 }
 
