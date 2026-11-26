@@ -1,20 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, useScroll, useTransform } from 'motion/react';
 import {
   ArrowRight,
   Terminal,
   Copy,
   Check,
-  Play,
   Zap,
-  Activity,
-  Layers,
-  ShieldCheck,
-  Cpu,
   RefreshCw,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface ScenarioPreset {
@@ -107,11 +103,22 @@ const PRESETS: ScenarioPreset[] = [
 ];
 
 export default function HeroSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [activePreset, setActivePreset] = useState<ScenarioPreset>(PRESETS[0]);
   const [copied, setCopied] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [liveRps, setLiveRps] = useState(PRESETS[0].expectedRps);
   const [liveP99, setLiveP99] = useState(PRESETS[0].p99);
+
+  // Scroll parallax transformations
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end start'],
+  });
+
+  const yHeadline = useTransform(scrollYProgress, [0, 1], [0, 40]);
+  const scaleCard = useTransform(scrollYProgress, [0, 1], [1, 0.96]);
+  const opacityCard = useTransform(scrollYProgress, [0, 0.9], [1, 0.88]);
 
   const cliSnippet = `npx cannonbench run ${activePreset.url} -c ${activePreset.concurrency} -d ${activePreset.duration}`;
 
@@ -143,10 +150,18 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative pt-12 pb-20 lg:pt-20 lg:pb-28 overflow-hidden bg-radiant-horizon border-b border-slate-200/80">
+    <section
+      ref={containerRef}
+      className="relative pt-12 pb-20 lg:pt-20 lg:pb-28 overflow-hidden bg-radiant-horizon border-b border-slate-200/80"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Top Centered Announcement Pill */}
-        <div className="flex justify-center mb-6">
+        {/* Top Centered Announcement Pill with entrance animation */}
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="flex justify-center mb-6"
+        >
           <Link
             href="/app"
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 border border-orange-200/80 text-slate-800 text-xs font-medium hover:border-orange-400 hover:bg-white transition-all shadow-2xs group"
@@ -156,10 +171,16 @@ export default function HeroSection() {
             <span>Zero-overhead SSE socket workbench</span>
             <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-600 transition-transform group-hover:translate-x-0.5" />
           </Link>
-        </div>
+        </motion.div>
 
-        {/* Monumental Hero Headline like tasteskill.dev */}
-        <div className="text-center max-w-4xl mx-auto">
+        {/* Monumental Hero Headline with Scroll Parallax */}
+        <motion.div
+          style={{ y: yHeadline }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center max-w-4xl mx-auto"
+        >
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 leading-[1.04]">
             The load testing workbench for high-throughput APIs.
           </h1>
@@ -193,10 +214,15 @@ export default function HeroSection() {
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Interactive Scenario Switcher Pills (like Coffee shop / Club night / Architects) */}
-        <div className="mt-12 lg:mt-16 max-w-5xl mx-auto">
+        {/* Interactive Scenario Switcher Pills */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-12 lg:mt-16 max-w-5xl mx-auto"
+        >
           <div className="flex items-center justify-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             {PRESETS.map((preset) => {
               const isSelected = activePreset.id === preset.id;
@@ -224,8 +250,11 @@ export default function HeroSection() {
             })}
           </div>
 
-          {/* Interactive Embedded Live Workbench Preview Frame */}
-          <div className="mt-4 rounded-2xl bg-white border border-slate-200/90 shadow-xl overflow-hidden transition-all">
+          {/* Interactive Embedded Live Workbench Preview Frame with Scroll Parallax */}
+          <motion.div
+            style={{ scale: scaleCard, opacity: opacityCard }}
+            className="mt-4 rounded-2xl bg-white border border-slate-200/90 shadow-xl overflow-hidden transition-all"
+          >
             {/* Window Title Bar */}
             <div className="bg-slate-900 px-4 py-3 text-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs border-b border-slate-800">
               <div className="flex items-center gap-3">
@@ -386,8 +415,8 @@ export default function HeroSection() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   );

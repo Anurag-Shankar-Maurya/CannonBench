@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { Terminal, Copy, Check, Box, Cpu, GitBranch, Layers } from 'lucide-react';
 
 interface Tab {
@@ -73,7 +74,13 @@ export default function InstallCommandBox() {
         </div>
 
         {/* Tabbed Command Box matching tasteskill.dev */}
-        <div className="max-w-4xl rounded-3xl bg-slate-900 text-slate-200 border border-slate-800 p-6 sm:p-8 shadow-xl">
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-4xl rounded-3xl bg-slate-900 text-slate-200 border border-slate-800 p-6 sm:p-8 shadow-xl"
+        >
           {/* Tab Headers */}
           <div className="flex items-center gap-2 border-b border-slate-800 pb-4 overflow-x-auto scrollbar-none">
             {TABS.map((tab) => {
@@ -146,7 +153,7 @@ export default function InstallCommandBox() {
               })}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

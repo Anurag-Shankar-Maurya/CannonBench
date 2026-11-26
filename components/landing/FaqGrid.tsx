@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { motion } from 'motion/react';
 import { HelpCircle } from 'lucide-react';
 import { FAQ_DATA } from '@/lib/faq-data';
 
@@ -6,8 +9,14 @@ export default function FaqGrid() {
   return (
     <section id="faq" className="py-20 lg:py-28 bg-white border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="max-w-3xl mb-14">
+        {/* Section Header with Scroll Entrance */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-3xl mb-14"
+        >
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-2">
             <HelpCircle className="w-3.5 h-3.5" />
             <span>Questions</span>
@@ -18,13 +27,21 @@ export default function FaqGrid() {
           <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed">
             Everything you need to know about CannonBench architecture, dual-engine socket parity, and local data privacy.
           </p>
-        </div>
+        </motion.div>
 
-        {/* 2-Column Grid of 6 Clean Bordered Cards matching tasteskill.dev */}
+        {/* 2-Column Grid with Staggered Scroll Entrance */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {FAQ_DATA.map((item, index) => (
-            <div
+            <motion.div
               key={index}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{
+                duration: 0.5,
+                delay: (index % 2) * 0.1,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               className="p-6 sm:p-8 rounded-3xl bg-[#FBFBFB] border border-slate-200/90 hover:border-slate-300 transition-all flex flex-col justify-between"
             >
               <div>
@@ -40,7 +57,7 @@ export default function FaqGrid() {
                 <span>QUESTION {index + 1} OF {FAQ_DATA.length}</span>
                 <span className="text-orange-600 font-semibold">VERIFIED</span>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

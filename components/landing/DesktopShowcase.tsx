@@ -1,12 +1,21 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { Download, Github, ArrowRight, Monitor, Laptop, Zap, Check } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Github, ArrowRight, Laptop, Check } from 'lucide-react';
 
 export default function DesktopShowcase() {
   return (
     <section className="py-20 lg:py-28 bg-[#FBFBFB] border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-slate-900 text-slate-100 p-8 sm:p-12 lg:p-16 border border-slate-800 shadow-2xl relative overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97, y: 24 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="rounded-3xl bg-slate-900 text-slate-100 p-8 sm:p-12 lg:p-16 border border-slate-800 shadow-2xl relative overflow-hidden"
+        >
           {/* Subtle orange accent glow in background */}
           <div className="absolute -top-24 -right-24 w-96 h-96 bg-orange-600/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -60,7 +69,7 @@ export default function DesktopShowcase() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

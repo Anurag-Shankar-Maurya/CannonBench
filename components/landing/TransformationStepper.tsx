@@ -82,8 +82,14 @@ export default function TransformationStepper() {
   return (
     <section id="transformation" className="py-20 lg:py-28 bg-[#FBFBFB] border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="max-w-3xl mb-12">
+        {/* Section Header with Scroll Entrance */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-3xl mb-12"
+        >
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-2">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Before & After</span>
@@ -94,10 +100,16 @@ export default function TransformationStepper() {
           <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed">
             See how API performance verification evolves from crude command-line scripts into an automated, precision engineering workflow.
           </p>
-        </div>
+        </motion.div>
 
-        {/* 2-Column Stepper Layout matching tasteskill.dev */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* 2-Column Stepper Layout with Scroll Entrance */}
+        <motion.div
+          initial={{ opacity: 0, y: 32 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+        >
           {/* Left Column: Step List Navigation */}
           <div className="lg:col-span-5 space-y-3">
             {STEPS.map((step, index) => {
@@ -400,7 +412,7 @@ export default function TransformationStepper() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

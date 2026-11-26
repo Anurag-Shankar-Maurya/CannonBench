@@ -1,5 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import SmoothScrollProvider from '@/components/landing/SmoothScrollProvider';
+import ScrollProgressBar from '@/components/landing/ScrollProgressBar';
 import LandingNavbar from '@/components/landing/Navbar';
 import HeroSection from '@/components/landing/HeroSection';
 import EcosystemLogos from '@/components/landing/EcosystemLogos';
@@ -74,45 +76,50 @@ export default function LandingHomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FBFBFB] text-[#0F172A] flex flex-col font-sans selection:bg-orange-500 selection:text-white">
-      {/* Search Engine & AI Agent Microdata */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <SmoothScrollProvider>
+      <div className="min-h-screen bg-[#FBFBFB] text-[#0F172A] flex flex-col font-sans selection:bg-orange-500 selection:text-white">
+        {/* Search Engine & AI Agent Microdata */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
 
-      {/* Top Navbar */}
-      <LandingNavbar />
+        {/* Global Reading Scroll Progress Line & Quick Navigation Pill */}
+        <ScrollProgressBar />
 
-      {/* Main Content Sections */}
-      <main className="flex-1">
-        {/* 1. Hero with radiant horizon, preset pills, and interactive workbench */}
-        <HeroSection />
+        {/* Top Navbar */}
+        <LandingNavbar />
 
-        {/* 2. Ecosystem integration logos */}
-        <EcosystemLogos />
+        {/* Main Content Sections */}
+        <main className="flex-1">
+          {/* 1. Hero with radiant horizon, preset pills, and interactive workbench */}
+          <HeroSection />
 
-        {/* 3. The Draw: Kinetic paradigms vertical scrubber */}
-        <KineticParadigms />
+          {/* 2. Ecosystem integration logos */}
+          <EcosystemLogos />
 
-        {/* 4. How it works: 3 detailed feature cards */}
-        <HowItWorksCards />
+          {/* 3. The Draw: Kinetic paradigms vertical scrubber */}
+          <KineticParadigms />
 
-        {/* 5. Before and After: 5-stage transformation stepper */}
-        <TransformationStepper />
+          {/* 4. How it works: 3 detailed feature cards */}
+          <HowItWorksCards />
 
-        {/* 6. Install & Run: Tabbed CLI & CI/CD box */}
-        <InstallCommandBox />
+          {/* 5. Before and After: 5-stage transformation stepper */}
+          <TransformationStepper />
 
-        {/* 7. Desktop & Workbench app showcase card */}
-        <DesktopShowcase />
+          {/* 6. Install & Run: Tabbed CLI & CI/CD box */}
+          <InstallCommandBox />
 
-        {/* 8. Questions: 2-column FAQ grid */}
-        <FaqGrid />
-      </main>
+          {/* 7. Desktop & Workbench app showcase card */}
+          <DesktopShowcase />
 
-      {/* 9. Radiant CTA Banner & Dark Footer with Giant Watermark */}
-      <RadiantCtaAndFooter />
-    </div>
+          {/* 8. Questions: 2-column FAQ grid */}
+          <FaqGrid />
+        </main>
+
+        {/* 9. Radiant CTA Banner & Dark Footer with Giant Watermark */}
+        <RadiantCtaAndFooter />
+      </div>
+    </SmoothScrollProvider>
   );
 }

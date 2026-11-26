@@ -1,13 +1,22 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import { Terminal, Zap, ShieldCheck, ArrowRight, Check, Code, Cpu } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Terminal, Zap, ShieldCheck, Check, Cpu } from 'lucide-react';
 
 export default function HowItWorksCards() {
   return (
     <section id="how-it-works" className="py-20 lg:py-28 bg-white border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="max-w-3xl mb-14">
+        {/* Section Header with Scroll Entrance */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-3xl mb-14"
+        >
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-2">
             <Zap className="w-3.5 h-3.5" />
             <span>How it works</span>
@@ -18,12 +27,18 @@ export default function HowItWorksCards() {
           <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed">
             One tool gives your team automated cURL ingestion, dual socket execution engines, and automated SLA regression gates to verify APIs under real load.
           </p>
-        </div>
+        </motion.div>
 
-        {/* 3 Detailed Feature Cards matching tasteskill.dev */}
+        {/* 3 Detailed Feature Cards matching tasteskill.dev with Staggered Scroll Entrance */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Card 1: cURL Ingestion */}
-          <div className="bg-[#FBFBFB] rounded-3xl p-6 sm:p-8 border border-slate-200/90 flex flex-col justify-between hover:border-slate-300 transition-all shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.55, delay: 0, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-[#FBFBFB] rounded-3xl p-6 sm:p-8 border border-slate-200/90 flex flex-col justify-between hover:border-slate-300 transition-all shadow-sm"
+          >
             <div>
               <div className="w-10 h-10 rounded-xl bg-orange-100 border border-orange-200 flex items-center justify-center text-orange-600 mb-5">
                 <Terminal className="w-5 h-5" />
@@ -58,10 +73,16 @@ export default function HowItWorksCards() {
                 1-click parameter extraction
               </span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 2: Dual Socket Engine */}
-          <div className="bg-[#FBFBFB] rounded-3xl p-6 sm:p-8 border border-slate-200/90 flex flex-col justify-between hover:border-slate-300 transition-all shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.55, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-[#FBFBFB] rounded-3xl p-6 sm:p-8 border border-slate-200/90 flex flex-col justify-between hover:border-slate-300 transition-all shadow-sm"
+          >
             <div>
               <div className="w-10 h-10 rounded-xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-5">
                 <Cpu className="w-5 h-5" />
@@ -101,10 +122,16 @@ export default function HowItWorksCards() {
                 Detect client vs server bottleneck
               </span>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 3: Quality Gates */}
-          <div className="bg-[#FBFBFB] rounded-3xl p-6 sm:p-8 border border-slate-200/90 flex flex-col justify-between hover:border-slate-300 transition-all shadow-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.55, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-[#FBFBFB] rounded-3xl p-6 sm:p-8 border border-slate-200/90 flex flex-col justify-between hover:border-slate-300 transition-all shadow-sm"
+          >
             <div>
               <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-5">
                 <ShieldCheck className="w-5 h-5" />
@@ -147,7 +174,7 @@ export default function HowItWorksCards() {
                 Fails CI pull requests automatically
               </span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
