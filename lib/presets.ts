@@ -74,6 +74,52 @@ export function createDefaultBenchmarkConfig(origin = ''): BenchmarkConfig {
   };
 }
 
+/**
+ * Resets all request options (headers, body, chaining, HAR, pipelining, engine modifiers)
+ * back to clean defaults while keeping the current target URL, concurrency, duration, and engine mode intact.
+ */
+export function resetRequestOptionsToDefault(config: BenchmarkConfig): BenchmarkConfig {
+  return {
+    ...config,
+    method: 'GET',
+    headers: [
+      { id: 'h-accept', key: 'Accept', value: 'application/json', enabled: true },
+    ],
+    bodyMode: 'none',
+    body: '',
+    contentType: 'application/json',
+    formFields: [],
+    useHar: false,
+    harFileName: undefined,
+    harRaw: undefined,
+    harRequests: [],
+    enableChaining: false,
+    chainedSteps: [],
+    pipelining: 1,
+    workers: 0,
+    pattern: 'constant',
+    overallRate: undefined,
+    connectionRate: undefined,
+    timeout: 10,
+    sampleInt: 1000,
+    ignoreCoordinatedOmission: false,
+    bailout: undefined,
+    maxConnectionRequests: undefined,
+    maxOverallRequests: undefined,
+    reconnectRate: undefined,
+    excludeErrorStats: false,
+    idReplacement: false,
+    expectBody: '',
+    servername: '',
+    warmupEnabled: false,
+    corsProxyUrl: '',
+    sloTargetLatencyMs: 150,
+    sloMaxErrorPct: 1,
+    sloMinRps: 50,
+    sloMaxP99Ms: 250,
+  };
+}
+
 export function getBuiltInPresets(origin = ''): EnvironmentPreset[] {
   const host = origin || 'http://localhost:3000';
   const base = createDefaultBenchmarkConfig(origin);

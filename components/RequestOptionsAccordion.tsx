@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import type { BenchmarkConfig, ChainedStep, LoadPattern } from '@/types/benchmark';
 import { buildAutocannonCliCommand, parseHarFileJson } from '@/lib/autocannon-cli';
+import { resetRequestOptionsToDefault } from '@/lib/presets';
 
 interface RequestOptionsAccordionProps {
   config: BenchmarkConfig;
@@ -131,6 +132,11 @@ export default function RequestOptionsAccordion({
     }
   };
 
+  const handleResetAllOptions = () => {
+    onChange(resetRequestOptionsToDefault(config));
+    onNotify('Reset headers, body & engine options to defaults (kept target URL)');
+  };
+
   const tabs: Array<{ id: OptionTab; label: string }> = [
     { id: 'headers', label: `Headers & Auth (${activeHeaderCount})` },
     { id: 'body', label: 'Body (JSON)' },
@@ -151,13 +157,13 @@ export default function RequestOptionsAccordion({
 
   return (
     <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-      {/* Accordion Summary Trigger */}
-      <button
-        type="button"
-        onClick={() => setIsOpen((v) => !v)}
-        className="w-full px-5 py-3.5 flex items-center justify-between gap-4 text-left hover:bg-slate-50/70 transition-colors"
-      >
-        <div className="flex flex-wrap items-center gap-2.5 min-w-0">
+      {/* Accordion Summary Bar with Toggle & Reset Button */}
+      <div className="w-full px-4 sm:px-5 py-3 flex items-center justify-between gap-3 bg-white hover:bg-slate-50/70 transition-colors">
+        <button
+          type="button"
+          onClick={() => setIsOpen((v) => !v)}
+          className="flex-1 flex flex-wrap items-center gap-2.5 min-w-0 text-left"
+        >
           <Sliders className="w-4 h-4 text-slate-400 shrink-0" />
           <span className="text-xs font-semibold text-slate-800 whitespace-nowrap">
             Request & Engine Options
@@ -175,14 +181,39 @@ export default function RequestOptionsAccordion({
             · {config.pattern} · Pipelining {config.pipelining}x
             {config.overallRate ? ` · ${config.overallRate} req/s cap` : ''}
           </span>
-        </div>
+        </button>
 
-        <ChevronDown
-          className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
-        />
-      </button>
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Quick Reset Button: resets headers, body, chaining & engine options to clean defaults without clearing URL */}
+          <button
+            type="button"
+            disabled={isRunning}
+            title="Reset headers, request body, chaining, and advanced engine options to clean defaults while keeping your target URL"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleResetAllOptions();
+            }}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50/50 bg-white border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap disabled:opacity-50"
+          >
+            <RotateCcw className="w-3 h-3 text-slate-500" />
+            <span className="hidden sm:inline">Reset Options</span>
+            <span className="sm:hidden">Reset</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsOpen((v) => !v)}
+            aria-label="Toggle options accordion"
+            className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <ChevronDown
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isOpen ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
+        </div>
+      </div>
 
       <AnimatePresence initial={false}>
         {isOpen && (
@@ -194,24 +225,38 @@ export default function RequestOptionsAccordion({
             className="overflow-hidden border-t border-slate-200/80"
           >
             {/* Tabs Navigation */}
-            <div className="px-4 sm:px-5 bg-slate-50/60 border-b border-slate-200/80 flex items-center gap-3 sm:gap-6 overflow-x-auto scrollbar-none">
-              {tabs.map((tab) => {
-                const active = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`py-3 text-xs font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 ${
-                      active
-                        ? 'border-indigo-600 text-indigo-600 font-semibold'
-                        : 'border-transparent text-slate-500 hover:text-slate-900'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
+            <div className="px-4 sm:px-5 bg-slate-50/60 border-b border-slate-200/80 flex items-center justify-between gap-3 overflow-x-auto scrollbar-none">
+              <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+                {tabs.map((tab) => {
+                  const active = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`py-3 text-xs font-medium border-b-2 transition-colors whitespace-nowrap shrink-0 ${
+                        active
+                          ? 'border-indigo-600 text-indigo-600 font-semibold'
+                          : 'border-transparent text-slate-500 hover:text-slate-900'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* In-tab reset shortcut */}
+              <button
+                type="button"
+                disabled={isRunning}
+                onClick={handleResetAllOptions}
+                title="Reset all options to clean defaults"
+                className="hidden md:inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 hover:text-rose-600 transition-colors shrink-0"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset to Defaults</span>
+              </button>
             </div>
 
             {/* Tab Content */}
