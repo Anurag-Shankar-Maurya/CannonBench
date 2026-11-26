@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertCircle, ChevronDown, Globe, Play, SlidersHorizontal, Square, Zap } from 'lucide-react';
+import { AlertCircle, ChevronDown, Globe, Play, SlidersHorizontal, Square, Terminal, Zap } from 'lucide-react';
 import type { BenchmarkConfig, HttpMethod } from '@/types/benchmark';
+import { isCurlCommand, normalizeAndFormatUrl, parseCurlCommand } from '@/lib/curl-parser';
 
 interface HeroControlBarProps {
   config: BenchmarkConfig;
@@ -13,6 +14,7 @@ interface HeroControlBarProps {
   activeStageLabel: string;
   onStart: () => void;
   onStop: () => void;
+  onNotify?: (msg: string) => void;
 }
 
 const METHODS: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
@@ -44,6 +46,7 @@ export default function HeroControlBar({
   activeStageLabel,
   onStart,
   onStop,
+  onNotify,
 }: HeroControlBarProps) {
   const [showCustomConn, setShowCustomConn] = useState(false);
 
@@ -57,11 +60,83 @@ export default function HeroControlBar({
     onChange({ ...config, [key]: val });
   };
 
+  const applyParsedCurl = (parsed: ReturnType<typeof parseCurlCommand>) => {
+    if (!parsed) return;
+    onChange({
+      ...config,
+      url: parsed.url,
+      method: parsed.method,
+      headers: parsed.headers.length > 0 ? parsed.headers : config.headers,
+      body: parsed.body || config.body,
+      bodyMode: parsed.bodyMode !== 'none' ? parsed.bodyMode : config.bodyMode,
+      contentType: parsed.contentType || config.contentType,
+    });
+    onNotify?.(parsed.summary);
+  };
+
+  const handleUrlPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const text = e.clipboardData.getData('text');
+    if (isCurlCommand(text)) {
+      e.preventDefault();
+      const parsed = parseCurlCommand(text);
+      if (parsed) {
+        applyParsedCurl(parsed);
+        return;
+      }
+    }
+
+    // If pasting a URL with query strings, escaped chars, or unformatted paths
+    if (/^https?:\/\//i.test(text.trim()) || text.includes('?') || text.includes('&')) {
+      const formatted = normalizeAndFormatUrl(text.trim());
+      if (formatted && formatted !== text.trim()) {
+        e.preventDefault();
+        update('url', formatted);
+        onNotify?.('Formatted URL & query parameters');
+      }
+    }
+  };
+
+  const handleUrlChange = (val: string) => {
+    if (isCurlCommand(val)) {
+      const parsed = parseCurlCommand(val);
+      if (parsed) {
+        applyParsedCurl(parsed);
+        return;
+      }
+    }
+    update('url', val);
+  };
+
+  const handleUrlBlur = () => {
+    if (config.url.trim()) {
+      const formatted = normalizeAndFormatUrl(config.url);
+      if (formatted && formatted !== config.url) {
+        update('url', formatted);
+      }
+    }
+  };
+
+  const handleImportCurlFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (isCurlCommand(text)) {
+        const parsed = parseCurlCommand(text);
+        if (parsed) {
+          applyParsedCurl(parsed);
+          return;
+        }
+      }
+      onNotify?.('Clipboard does not contain a valid cURL command');
+    } catch {
+      onNotify?.('Paste your cURL command directly into the URL bar (Ctrl+V)');
+    }
+  };
+
   return (
     <div className="relative rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-3.5 shadow-xs overflow-visible space-y-2.5 sm:space-y-3">
       {/* Row 1: Method Selector + Full-Width Target URL Input + Sandbox Shortcut */}
       <div className="w-full space-y-2 sm:space-y-0 sm:flex sm:items-center sm:gap-2.5">
-        {/* On mobile (<sm), Method selector & Sandbox button share a top row so URL input gets 100% width */}
+        {/* On mobile (<sm), Method selector & Sandbox / cURL buttons share a top row */}
         <div className="flex sm:hidden items-center justify-between gap-2">
           <div className="relative">
             <select
@@ -82,17 +157,29 @@ export default function HeroControlBar({
             <ChevronDown className="w-3.5 h-3.5 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 opacity-60" />
           </div>
 
-          <button
-            type="button"
-            disabled={isRunning}
-            onClick={() => {
-              const origin = typeof window !== 'undefined' ? window.location.origin : '';
-              update('url', `${origin}/api/sandbox/target?delay=18&jitter=12`);
-            }}
-            className="px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
-          >
-            Sandbox
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              disabled={isRunning}
+              onClick={handleImportCurlFromClipboard}
+              title="Paste cURL from clipboard"
+              className="px-2 py-1 text-[11px] font-mono font-medium text-slate-600 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50 border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50 inline-flex items-center gap-1"
+            >
+              <Terminal className="w-3 h-3 text-slate-400" />
+              <span>cURL</span>
+            </button>
+            <button
+              type="button"
+              disabled={isRunning}
+              onClick={() => {
+                const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                update('url', `${origin}/api/sandbox/target?delay=18&jitter=12`);
+              }}
+              className="px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+            >
+              Sandbox
+            </button>
+          </div>
         </div>
 
         {/* On desktop (>=sm), Method selector is inline with URL */}
@@ -122,22 +209,36 @@ export default function HeroControlBar({
             aria-label="Target URL"
             disabled={isRunning}
             value={config.url}
-            onChange={(e) => update('url', e.target.value)}
-            placeholder="https://api.example.com/v1/..."
-            className="h-10 sm:h-11 w-full min-w-0 pl-3.5 sm:pl-4 pr-3 sm:pr-24 text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
+            onChange={(e) => handleUrlChange(e.target.value)}
+            onPaste={handleUrlPaste}
+            onBlur={handleUrlBlur}
+            placeholder="https://api.example.com/v1/... or paste cURL"
+            className="h-10 sm:h-11 w-full min-w-0 pl-3.5 sm:pl-4 pr-3 sm:pr-44 text-xs sm:text-sm font-mono text-slate-900 placeholder:text-slate-400 bg-slate-50/70 border border-slate-200/80 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all disabled:opacity-60"
           />
-          {/* Sandbox shortcut inside input on desktop only */}
-          <button
-            type="button"
-            disabled={isRunning}
-            onClick={() => {
-              const origin = typeof window !== 'undefined' ? window.location.origin : '';
-              update('url', `${origin}/api/sandbox/target?delay=18&jitter=12`);
-            }}
-            className="hidden sm:block absolute right-2 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
-          >
-            Sandbox
-          </button>
+          {/* Shortcuts inside input on desktop only */}
+          <div className="hidden sm:flex items-center gap-1.5 absolute right-2">
+            <button
+              type="button"
+              disabled={isRunning}
+              onClick={handleImportCurlFromClipboard}
+              title="Paste cURL from clipboard (or press Ctrl+V / Cmd+V anywhere)"
+              className="px-2 py-1 text-[11px] font-mono font-medium text-slate-500 hover:text-indigo-600 bg-slate-100/90 hover:bg-indigo-50 border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50 inline-flex items-center gap-1"
+            >
+              <Terminal className="w-3 h-3 text-slate-400" />
+              <span>Paste cURL</span>
+            </button>
+            <button
+              type="button"
+              disabled={isRunning}
+              onClick={() => {
+                const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                update('url', `${origin}/api/sandbox/target?delay=18&jitter=12`);
+              }}
+              className="px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 bg-white border border-slate-200 rounded-lg shadow-2xs transition-colors whitespace-nowrap shrink-0 disabled:opacity-50"
+            >
+              Sandbox
+            </button>
+          </div>
         </div>
       </div>
 

@@ -17,6 +17,7 @@ import {
   saveStoredRuns,
 } from '@/lib/presets';
 import { BrowserLoadRunner } from '@/lib/browser-engine/browser-load-runner';
+import { isCurlCommand, parseCurlCommand } from '@/lib/curl-parser';
 import HeroControlBar from './HeroControlBar';
 import RequestOptionsAccordion from './RequestOptionsAccordion';
 import BentoMetricsRow from './BentoMetricsRow';
@@ -353,6 +354,42 @@ export default function CannonBenchApp() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isRunning, handleStopBenchmark, executeBenchmark]);
 
+  // Global cURL paste listener
+  useEffect(() => {
+    const onPaste = (e: ClipboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      // Do not intercept if actively typing in a textarea (like JSON body) or header field
+      if (
+        target &&
+        (target.tagName === 'TEXTAREA' ||
+          (target.tagName === 'INPUT' && target.getAttribute('type') !== 'url'))
+      ) {
+        return;
+      }
+
+      const text = e.clipboardData?.getData('text') || '';
+      if (isCurlCommand(text)) {
+        const parsed = parseCurlCommand(text);
+        if (parsed) {
+          e.preventDefault();
+          setConfig((prev) => ({
+            ...prev,
+            url: parsed.url,
+            method: parsed.method,
+            headers: parsed.headers.length > 0 ? parsed.headers : prev.headers,
+            body: parsed.body || prev.body,
+            bodyMode: parsed.bodyMode !== 'none' ? parsed.bodyMode : prev.bodyMode,
+            contentType: parsed.contentType || prev.contentType,
+          }));
+          notify(parsed.summary);
+        }
+      }
+    };
+
+    window.addEventListener('paste', onPaste);
+    return () => window.removeEventListener('paste', onPaste);
+  }, [notify]);
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col">
       {/* Top Header */}
@@ -434,6 +471,7 @@ export default function CannonBenchApp() {
           activeStageLabel={activeStageLabel}
           onStart={() => executeBenchmark()}
           onStop={handleStopBenchmark}
+          onNotify={notify}
         />
 
         {/* Collapsible Request Options Tabs */}
