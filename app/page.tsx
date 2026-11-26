@@ -73,7 +73,7 @@ export default function LandingHomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col selection:bg-indigo-100 selection:text-indigo-950">
       {/* Inject Structured Data */}
       <script
         type="application/ld+json"

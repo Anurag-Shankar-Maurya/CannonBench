@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const viewport: Viewport = {
-  themeColor: '#4f46e5',
+  themeColor: '#F8FAFC',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
@@ -11,11 +11,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://cannonbench.dev'),
   title: {
-    default: 'CannonBench — The Modern HTTP Load & Stress Testing Workbench',
+    default: 'CannonBench — Autocannon HTTP Load Testing Workbench',
     template: '%s | CannonBench',
   },
   description:
-    'Free, open-source HTTP/1.1 & HTTP/2 load testing workbench powered by Autocannon. Real-time streaming telemetry, percentile distributions, automated SLO quality gates, and zero database footprint.',
+    'Open-source HTTP/1.1 and HTTP/2 stress testing workbench powered by Autocannon. Real-time streaming socket telemetry, percentile distributions, automated SLO quality gates, and zero database footprint.',
   keywords: [
     'load testing',
     'stress testing',
@@ -59,18 +59,20 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://cannonbench.dev',
     siteName: 'CannonBench',
-    title: 'CannonBench — The Modern HTTP Load & Stress Testing Workbench',
+    title: 'CannonBench — Autocannon HTTP Load Testing Workbench',
     description:
-      'Autocannon raw socket performance meets real-time streaming telemetry, binned percentile histograms, and automated SLO gates. Zero DB footprint.',
+      'Autocannon raw socket performance meets real-time streaming telemetry, binned percentile histograms, and automated SLO gates. Zero database footprint.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CannonBench — The Modern HTTP Load & Stress Testing Workbench',
+    title: 'CannonBench — Autocannon HTTP Load Testing Workbench',
     description:
       'Autocannon raw socket performance meets real-time streaming telemetry, binned percentile histograms, and automated SLO gates.',
     creator: '@cannonbench',
   },
   other: {
+    'page-type': 'software',
+    'site-kind': 'software',
     'geo.region': 'US',
     'geo.placename': 'Global Edge',
     'rating': 'general',
@@ -79,8 +81,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" data-type="software" className="scroll-smooth light">
       <head>
+        <meta name="page-type" content="software" />
+        <meta name="site-kind" content="software" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -91,7 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="geo.placename" content="Global Edge" />
       </head>
       <body
-        className="bg-[#F8FAFC] text-[#0F172A] font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900"
+        className="bg-[#F8FAFC] text-[#0F172A] font-sans antialiased selection:bg-indigo-100 selection:text-indigo-950"
         suppressHydrationWarning
       >
         {children}
