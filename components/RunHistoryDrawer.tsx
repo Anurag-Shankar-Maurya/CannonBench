@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { BenchmarkRunRecord } from '@/types/benchmark';
 import { computeRunComparison, formatBytes } from '@/lib/diagnostics';
+import { exportAllUserDataJson, importUserDataJson } from '@/lib/presets';
 
 interface RunHistoryDrawerProps {
   open: boolean;
@@ -62,18 +63,31 @@ export default function RunHistoryDrawer({
   }, [runA, runB]);
 
   const handleExportJson = () => {
-    const blob = new Blob([JSON.stringify(runs, null, 2)], { type: 'application/json' });
+    const jsonStr = exportAllUserDataJson();
+    const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `cannonbench-history-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `cannonbench-backup-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    onNotify('Exported full backup (runs & custom presets)');
   };
 
   const handleImport = async (file: File) => {
     try {
       const txt = await file.text();
+      try {
+        const res = importUserDataJson(txt);
+        if (res.runsImported > 0 || res.presetsImported > 0) {
+          onNotify(`Imported ${res.runsImported} runs and ${res.presetsImported} presets!`);
+          window.location.reload();
+          return;
+        }
+      } catch {
+        // Fallback for legacy raw array
+      }
+
       const parsed = JSON.parse(txt);
       const list = Array.isArray(parsed) ? parsed : [parsed];
       const valid = list.filter(

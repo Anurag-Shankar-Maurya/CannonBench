@@ -48,6 +48,24 @@ export interface SpikeConfig {
   recoveryDurationSec: number;
 }
 
+export interface ChainedStepVariableExtract {
+  jsonPath: string; // e.g. "token" or "data.user.id"
+  varName: string; // e.g. "authToken"
+}
+
+export interface ChainedStep {
+  id: string;
+  name: string;
+  method: HttpMethod;
+  url: string;
+  headers: HeaderEntry[];
+  bodyMode: BodyMode;
+  body: string;
+  contentType: string;
+  extractVariables: ChainedStepVariableExtract[];
+  expectBody?: string;
+}
+
 export interface BenchmarkConfig {
   title: string;
   url: string;
@@ -87,6 +105,18 @@ export interface BenchmarkConfig {
   spikeConfig: SpikeConfig;
   sloTargetLatencyMs: number;
   sloMaxErrorPct: number;
+  sloMinRps?: number;
+  sloMaxP99Ms?: number;
+  corsProxyUrl?: string;
+  enableChaining?: boolean;
+  chainedSteps?: ChainedStep[];
+}
+
+export interface LatencyHistogramBucket {
+  bucketMs: number;
+  label: string;
+  count: number;
+  percentage: number;
 }
 
 export interface TickSample {
@@ -107,6 +137,7 @@ export interface TickSample {
   errors: number;
   timeouts: number;
   mismatches: number;
+  corsErrors?: number;
 }
 
 export interface LatencySummary {
@@ -182,6 +213,9 @@ export interface AutocannonResultSummary {
     errors: number;
     non2xx: number;
   }>;
+  histogram?: LatencyHistogramBucket[];
+  sloStatus?: 'passed' | 'breached';
+  sloBreaches?: string[];
 }
 
 export interface DiagnosticFinding {
@@ -203,6 +237,8 @@ export interface BenchmarkRunRecord {
   apdexScore: number;
   diagnostics: DiagnosticFinding[];
   cliCommand: string;
+  sloStatus?: 'passed' | 'breached';
+  sloBreaches?: string[];
 }
 
 export interface EnvironmentPreset {

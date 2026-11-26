@@ -3,8 +3,95 @@ import type {
   BenchmarkConfig,
   BenchmarkRunRecord,
   DiagnosticFinding,
+  LatencyHistogramBucket,
   RunComparisonMetrics,
 } from '@/types/benchmark';
+
+export function evaluateSloThresholds(
+  result: AutocannonResultSummary,
+  config: BenchmarkConfig
+): { status: 'passed' | 'breached'; breaches: string[] } {
+  const breaches: string[] = [];
+  const totalCompleted = result.requests.total || 0;
+  const totalWithErrors = totalCompleted + result.errors;
+  const errorRatePct = totalWithErrors > 0 ? (result.errors / totalWithErrors) * 100 : 0;
+
+  if (config.sloMaxErrorPct !== undefined && errorRatePct > config.sloMaxErrorPct) {
+    breaches.push(
+      `Error rate (${errorRatePct.toFixed(1)}%) exceeded maximum allowed (${config.sloMaxErrorPct}%)`
+    );
+  }
+
+  if (config.sloMaxP99Ms && result.latency.p99 > config.sloMaxP99Ms) {
+    breaches.push(
+      `p99 latency (${result.latency.p99} ms) exceeded threshold (${config.sloMaxP99Ms} ms)`
+    );
+  }
+
+  if (config.sloTargetLatencyMs && result.latency.p50 > config.sloTargetLatencyMs) {
+    breaches.push(
+      `p50 median latency (${result.latency.p50} ms) exceeded target (${config.sloTargetLatencyMs} ms)`
+    );
+  }
+
+  if (config.sloMinRps && result.requests.average < config.sloMinRps) {
+    breaches.push(
+      `Throughput (${Math.round(result.requests.average)} RPS) fell below minimum target (${config.sloMinRps} RPS)`
+    );
+  }
+
+  return {
+    status: breaches.length === 0 ? 'passed' : 'breached',
+    breaches,
+  };
+}
+
+export function buildLatencyHistogram(latencies: number[]): LatencyHistogramBucket[] {
+  if (latencies.length === 0) return [];
+  const boundaries = [5, 10, 25, 50, 100, 200, 400, 800, 1500, 3000];
+  const counts = new Array(boundaries.length + 1).fill(0);
+
+  for (const lat of latencies) {
+    let placed = false;
+    for (let i = 0; i < boundaries.length; i++) {
+      if (lat <= boundaries[i]) {
+        counts[i]++;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      counts[boundaries.length]++;
+    }
+  }
+
+  const total = latencies.length;
+  const buckets: LatencyHistogramBucket[] = [];
+
+  for (let i = 0; i < counts.length; i++) {
+    let label = '';
+    let bucketMs = 0;
+    if (i === 0) {
+      label = `≤${boundaries[0]}ms`;
+      bucketMs = boundaries[0];
+    } else if (i === boundaries.length) {
+      label = `>${boundaries[boundaries.length - 1]}ms`;
+      bucketMs = boundaries[boundaries.length - 1] * 1.5;
+    } else {
+      label = `${boundaries[i - 1]}-${boundaries[i]}ms`;
+      bucketMs = boundaries[i];
+    }
+
+    buckets.push({
+      bucketMs,
+      label,
+      count: counts[i],
+      percentage: total > 0 ? Number(((counts[i] / total) * 100).toFixed(1)) : 0,
+    });
+  }
+
+  return buckets;
+}
 
 export function computeApdexScore(
   result: AutocannonResultSummary,

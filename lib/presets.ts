@@ -65,6 +65,11 @@ export function createDefaultBenchmarkConfig(origin = ''): BenchmarkConfig {
     },
     sloTargetLatencyMs: 150,
     sloMaxErrorPct: 1,
+    sloMinRps: 50,
+    sloMaxP99Ms: 250,
+    corsProxyUrl: '',
+    enableChaining: false,
+    chainedSteps: [],
   };
 }
 
@@ -213,4 +218,43 @@ export function saveCustomPresets(presets: EnvironmentPreset[]): void {
   } catch {
     // Ignore storage failure cleanly
   }
+}
+
+export function exportAllUserDataJson(): string {
+  const runs = loadStoredRuns();
+  const presets = loadCustomPresets();
+  const bundle = {
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    runs,
+    presets,
+  };
+  return JSON.stringify(bundle, null, 2);
+}
+
+export function importUserDataJson(jsonStr: string): { runsImported: number; presetsImported: number } {
+  const parsed = JSON.parse(jsonStr);
+  let runsImported = 0;
+  let presetsImported = 0;
+
+  if (Array.isArray(parsed.runs)) {
+    const existing = loadStoredRuns();
+    const existingIds = new Set(existing.map((r) => r.id));
+    const merged = [...parsed.runs.filter((r: BenchmarkRunRecord) => !existingIds.has(r.id)), ...existing];
+    saveStoredRuns(merged);
+    runsImported = parsed.runs.length;
+  }
+
+  if (Array.isArray(parsed.presets)) {
+    const existingPresets = loadCustomPresets();
+    const existingPresetIds = new Set(existingPresets.map((p) => p.id));
+    const mergedPresets = [
+      ...parsed.presets.filter((p: EnvironmentPreset) => !existingPresetIds.has(p.id)),
+      ...existingPresets,
+    ];
+    saveCustomPresets(mergedPresets);
+    presetsImported = parsed.presets.length;
+  }
+
+  return { runsImported, presetsImported };
 }

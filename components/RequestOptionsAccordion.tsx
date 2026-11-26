@@ -13,7 +13,7 @@ import {
   Sliders,
   Trash2,
 } from 'lucide-react';
-import type { BenchmarkConfig, LoadPattern } from '@/types/benchmark';
+import type { BenchmarkConfig, ChainedStep, LoadPattern } from '@/types/benchmark';
 import { buildAutocannonCliCommand, parseHarFileJson } from '@/lib/autocannon-cli';
 
 interface RequestOptionsAccordionProps {
@@ -23,7 +23,7 @@ interface RequestOptionsAccordionProps {
   onNotify: (msg: string) => void;
 }
 
-type OptionTab = 'headers' | 'body' | 'form' | 'advanced';
+type OptionTab = 'headers' | 'body' | 'form' | 'chaining' | 'slo' | 'advanced';
 
 const PATTERNS: Array<{ id: LoadPattern; label: string }> = [
   { id: 'constant', label: 'Constant' },
@@ -139,7 +139,14 @@ export default function RequestOptionsAccordion({
       label:
         config.formFields.length > 0 ? `Form Data (${config.formFields.length})` : 'Form Data',
     },
-    { id: 'advanced', label: 'Advanced (Pipelining, Rate Limit, HAR file replay)' },
+    {
+      id: 'chaining',
+      label: config.enableChaining
+        ? `Request Chaining (${config.chainedSteps?.length || 0} steps)`
+        : 'Request Chaining',
+    },
+    { id: 'slo', label: 'SLO Quality Gates' },
+    { id: 'advanced', label: 'Advanced Engine Options' },
   ];
 
   return (
@@ -495,6 +502,314 @@ export default function RequestOptionsAccordion({
                       <Plus className="w-3.5 h-3.5" />
                       Add Form Field
                     </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'chaining' && (
+                <div className="space-y-6">
+                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between gap-4">
+                    <div>
+                      <h4 className="text-xs font-semibold text-slate-800">
+                        Multi-Step Request Chaining (k6 / Postman Parity)
+                      </h4>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Chain sequential API requests. Extract tokens or IDs from JSON responses and inject them into subsequent steps using <code className="text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded font-mono">{'{{varName}}'}</code>.
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(config.enableChaining)}
+                        onChange={(e) => {
+                          const enabled = e.target.checked;
+                          const steps: ChainedStep[] = (config.chainedSteps && config.chainedSteps.length > 0)
+                            ? config.chainedSteps
+                            : [
+                                {
+                                  id: 'step-1',
+                                  name: '1. Authenticate',
+                                  method: 'POST',
+                                  url: config.url,
+                                  headers: [{ id: 'h-1', key: 'Content-Type', value: 'application/json', enabled: true }],
+                                  bodyMode: 'raw',
+                                  body: '{\n  "username": "demo",\n  "password": "password"\n}',
+                                  contentType: 'application/json',
+                                  extractVariables: [{ jsonPath: 'token', varName: 'authToken' }],
+                                },
+                                {
+                                  id: 'step-2',
+                                  name: '2. Fetch User Profile',
+                                  method: 'GET',
+                                  url: config.url.replace('/target', '/target?user={{authToken}}'),
+                                  headers: [{ id: 'h-2', key: 'Authorization', value: 'Bearer {{authToken}}', enabled: true }],
+                                  bodyMode: 'none',
+                                  body: '',
+                                  contentType: 'application/json',
+                                  extractVariables: [],
+                                },
+                              ];
+                          onChange({
+                            ...config,
+                            enableChaining: enabled,
+                            chainedSteps: steps,
+                          });
+                          onNotify(enabled ? 'Enabled request chaining' : 'Disabled request chaining');
+                        }}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                  </div>
+
+                  {config.enableChaining && (
+                    <div className="space-y-4">
+                      {(config.chainedSteps || []).map((step, idx) => (
+                        <div
+                          key={step.id}
+                          className="p-4 bg-white border border-slate-200 rounded-xl space-y-3 shadow-2xs"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <input
+                              type="text"
+                              value={step.name}
+                              onChange={(e) => {
+                                const next = [...(config.chainedSteps || [])];
+                                next[idx] = { ...step, name: e.target.value };
+                                update('chainedSteps', next);
+                              }}
+                              className="text-xs font-semibold text-slate-800 bg-transparent border-b border-dashed border-slate-300 focus:border-indigo-600 focus:outline-none px-1 py-0.5"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const next = (config.chainedSteps || []).filter((_, i) => i !== idx);
+                                update('chainedSteps', next);
+                              }}
+                              className="text-slate-400 hover:text-rose-600 p-1 rounded transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="grid grid-cols-12 gap-2">
+                            <select
+                              value={step.method}
+                              onChange={(e) => {
+                                const next = [...(config.chainedSteps || [])];
+                                next[idx] = { ...step, method: e.target.value as any };
+                                update('chainedSteps', next);
+                              }}
+                              className="col-span-3 sm:col-span-2 h-8 px-2 text-xs font-bold bg-slate-50 border border-slate-200 rounded-lg text-slate-700"
+                            >
+                              {['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map((m) => (
+                                <option key={m} value={m}>{m}</option>
+                              ))}
+                            </select>
+                            <input
+                              type="text"
+                              value={step.url}
+                              onChange={(e) => {
+                                const next = [...(config.chainedSteps || [])];
+                                next[idx] = { ...step, url: e.target.value };
+                                update('chainedSteps', next);
+                              }}
+                              placeholder="https://api.example.com/endpoint"
+                              className="col-span-9 sm:col-span-10 h-8 px-2.5 text-xs font-mono bg-white border border-slate-200 rounded-lg focus:border-indigo-600"
+                            />
+                          </div>
+
+                          {/* Variable Extraction List */}
+                          <div className="p-3 bg-slate-50/70 border border-slate-200/60 rounded-lg space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[11px] font-semibold text-slate-700">
+                                Extract Variables from JSON Response
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const next = [...(config.chainedSteps || [])];
+                                  next[idx] = {
+                                    ...step,
+                                    extractVariables: [
+                                      ...step.extractVariables,
+                                      { jsonPath: '', varName: '' },
+                                    ],
+                                  };
+                                  update('chainedSteps', next);
+                                }}
+                                className="inline-flex items-center gap-1 text-[11px] text-indigo-600 hover:text-indigo-700 font-medium"
+                              >
+                                <Plus className="w-3 h-3" /> Add Extractor
+                              </button>
+                            </div>
+
+                            {step.extractVariables.length === 0 ? (
+                              <p className="text-[11px] text-slate-400 italic">No variables extracted from this step.</p>
+                            ) : (
+                              <div className="space-y-1.5">
+                                {step.extractVariables.map((ext, extIdx) => (
+                                  <div key={extIdx} className="flex items-center gap-2">
+                                    <span className="text-[11px] font-mono text-slate-400">JSON Path:</span>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. data.token or id"
+                                      value={ext.jsonPath}
+                                      onChange={(e) => {
+                                        const next = [...(config.chainedSteps || [])];
+                                        const nextExts = [...step.extractVariables];
+                                        nextExts[extIdx] = { ...ext, jsonPath: e.target.value };
+                                        next[idx] = { ...step, extractVariables: nextExts };
+                                        update('chainedSteps', next);
+                                      }}
+                                      className="h-7 px-2 text-[11px] font-mono bg-white border border-slate-200 rounded flex-1"
+                                    />
+                                    <span className="text-[11px] font-mono text-slate-400">→ Variable:</span>
+                                    <input
+                                      type="text"
+                                      placeholder="e.g. authToken"
+                                      value={ext.varName}
+                                      onChange={(e) => {
+                                        const next = [...(config.chainedSteps || [])];
+                                        const nextExts = [...step.extractVariables];
+                                        nextExts[extIdx] = { ...ext, varName: e.target.value };
+                                        next[idx] = { ...step, extractVariables: nextExts };
+                                        update('chainedSteps', next);
+                                      }}
+                                      className="h-7 px-2 text-[11px] font-mono bg-white border border-slate-200 rounded w-36"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const next = [...(config.chainedSteps || [])];
+                                        next[idx] = {
+                                          ...step,
+                                          extractVariables: step.extractVariables.filter((_, i) => i !== extIdx),
+                                        };
+                                        update('chainedSteps', next);
+                                      }}
+                                      className="text-slate-400 hover:text-rose-600 p-0.5"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const steps = config.chainedSteps || [];
+                          const newStep: ChainedStep = {
+                            id: `step-${Date.now()}`,
+                            name: `${steps.length + 1}. Action Step`,
+                            method: 'GET',
+                            url: config.url,
+                            headers: [{ id: `h-${Date.now()}`, key: 'Accept', value: 'application/json', enabled: true }],
+                            bodyMode: 'none',
+                            body: '',
+                            contentType: 'application/json',
+                            extractVariables: [],
+                          };
+                          update('chainedSteps', [...steps, newStep]);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Add Step to Chain
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'slo' && (
+                <div className="space-y-6">
+                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
+                    <h4 className="text-xs font-semibold text-slate-800">
+                      Service Level Objective (SLO) Quality Gates
+                    </h4>
+                    <p className="text-[11px] text-slate-500">
+                      Configure hard acceptance criteria for production performance. The test runner checks your final latency, throughput, and error rates against these thresholds and flags breach violations.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-1.5">
+                      <label className="block text-[11px] font-semibold text-slate-700">
+                        Target Latency (p50 Median)
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          min={5}
+                          max={10000}
+                          value={config.sloTargetLatencyMs || 150}
+                          onChange={(e) => update('sloTargetLatencyMs', Number(e.target.value) || 150)}
+                          className="w-full h-8 px-2.5 text-xs font-mono tabular-nums bg-slate-50 border border-slate-200 rounded-lg"
+                        />
+                        <span className="text-xs text-slate-500 font-mono">ms</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400">Target response time for APDEX satisfaction.</p>
+                    </div>
+
+                    <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-1.5">
+                      <label className="block text-[11px] font-semibold text-slate-700">
+                        Max Tail Latency (p99 Gate)
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          min={10}
+                          max={30000}
+                          value={config.sloMaxP99Ms || 250}
+                          onChange={(e) => update('sloMaxP99Ms', Number(e.target.value) || 250)}
+                          className="w-full h-8 px-2.5 text-xs font-mono tabular-nums bg-slate-50 border border-slate-200 rounded-lg"
+                        />
+                        <span className="text-xs text-slate-500 font-mono">ms</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400">Fails if 99th percentile exceeds this threshold.</p>
+                    </div>
+
+                    <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-1.5">
+                      <label className="block text-[11px] font-semibold text-slate-700">
+                        Max Error Rate (%)
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          step="0.1"
+                          min={0}
+                          max={100}
+                          value={config.sloMaxErrorPct ?? 1}
+                          onChange={(e) => update('sloMaxErrorPct', Number(e.target.value) || 0)}
+                          className="w-full h-8 px-2.5 text-xs font-mono tabular-nums bg-slate-50 border border-slate-200 rounded-lg"
+                        />
+                        <span className="text-xs text-slate-500 font-mono">%</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400">Fails if non-2xx/network errors exceed this %.</p>
+                    </div>
+
+                    <div className="p-3.5 bg-white border border-slate-200 rounded-xl space-y-1.5">
+                      <label className="block text-[11px] font-semibold text-slate-700">
+                        Min Throughput (RPS)
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="number"
+                          min={1}
+                          max={100000}
+                          value={config.sloMinRps || 50}
+                          onChange={(e) => update('sloMinRps', Number(e.target.value) || 0)}
+                          className="w-full h-8 px-2.5 text-xs font-mono tabular-nums bg-slate-50 border border-slate-200 rounded-lg"
+                        />
+                        <span className="text-xs text-slate-500 font-mono">req/s</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400">Fails if average RPS drops below this capacity.</p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1001,6 +1316,26 @@ export default function RequestOptionsAccordion({
                       </div>
                     </div>
                     {harError && <p className="text-xs text-rose-600">{harError}</p>}
+                  </div>
+
+                  {/* CORS Proxy Relay Setting for Edge Benchmarking */}
+                  <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-slate-800">
+                        CORS Proxy / Relay (For External APIs)
+                      </span>
+                      <span className="text-[10px] text-indigo-600 font-medium">Edge Device Mode</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      When benchmarking external APIs directly from your browser, target servers that lack CORS headers can be reached through an optional CORS proxy URL. Leave blank for direct access (e.g. localhost or CORS-enabled APIs).
+                    </p>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://corsproxy.io/? or custom proxy"
+                      value={config.corsProxyUrl || ''}
+                      onChange={(e) => update('corsProxyUrl', e.target.value)}
+                      className="w-full h-8 px-2.5 text-xs font-mono bg-white border border-slate-200 rounded-lg focus:border-indigo-600"
+                    />
                   </div>
                 </div>
               )}

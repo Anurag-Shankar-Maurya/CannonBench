@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, CheckCircle2, Info, ShieldAlert, ShieldCheck, XCircle, BarChart3 } from 'lucide-react';
 import type { BenchmarkRunRecord } from '@/types/benchmark';
 import { formatBytes } from '@/lib/diagnostics';
 
@@ -10,7 +10,8 @@ interface ResultsDistributionProps {
 }
 
 export default function ResultsDistribution({ run }: ResultsDistributionProps) {
-  const { result, diagnostics, apdexScore, config } = run;
+  const { result, diagnostics, apdexScore, config, sloStatus, sloBreaches } = run;
+  const [hoveredBucket, setHoveredBucket] = useState<number | null>(null);
 
   const percentileRows = [
     { label: '2.5%', value: result.latency.p2_5 },
@@ -26,6 +27,112 @@ export default function ResultsDistribution({ run }: ResultsDistributionProps) {
 
   return (
     <div className="space-y-6">
+      {/* SLO Quality Gate Banner */}
+      {sloStatus && (
+        <div
+          className={`p-4 rounded-2xl border flex items-start justify-between gap-4 transition-all ${
+            sloStatus === 'passed'
+              ? 'bg-emerald-50/70 border-emerald-200/90 text-emerald-950'
+              : 'bg-rose-50/70 border-rose-200/90 text-rose-950'
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            {sloStatus === 'passed' ? (
+              <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+            ) : (
+              <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+            )}
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider">
+                  SLO Quality Gate: {sloStatus === 'passed' ? 'PASSED' : 'BREACHED'}
+                </span>
+                <span className="text-[11px] font-mono text-slate-500">
+                  Target {config.sloTargetLatencyMs}ms · p99 &lt;= {config.sloMaxP99Ms || 250}ms · Max Err {config.sloMaxErrorPct}%
+                </span>
+              </div>
+              {sloStatus === 'passed' ? (
+                <p className="text-xs text-emerald-800 mt-1">
+                  Benchmark met all Service Level Objectives for latency, throughput, and reliability under load.
+                </p>
+              ) : (
+                <div className="mt-1 space-y-1">
+                  <p className="text-xs text-rose-800 font-medium">The following criteria failed quality gates:</p>
+                  <ul className="list-disc list-inside text-xs text-rose-700 space-y-0.5">
+                    {(sloBreaches || []).map((b, i) => (
+                      <li key={i}>{b}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Latency Histogram Distribution (3B) */}
+      {result.histogram && result.histogram.length > 0 && (
+        <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-indigo-600 shrink-0" />
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Latency Distribution Histogram
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Binned frequency curve revealing tail anomalies and multimodal distribution patterns
+                </p>
+              </div>
+            </div>
+            {hoveredBucket !== null && result.histogram[hoveredBucket] && (
+              <div className="text-right text-xs font-mono">
+                <span className="text-indigo-600 font-bold">
+                  {result.histogram[hoveredBucket].label}:
+                </span>{' '}
+                <span className="text-slate-800 font-semibold">
+                  {result.histogram[hoveredBucket].count.toLocaleString()} reqs ({result.histogram[hoveredBucket].percentage}%)
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-5 sm:grid-cols-11 gap-1.5 items-end h-32 pt-4 px-2 bg-slate-50/60 rounded-xl border border-slate-100">
+            {result.histogram.map((bucket, idx) => {
+              const maxPct = Math.max(1, ...result.histogram!.map((h) => h.percentage));
+              const heightPct = Math.max(8, Math.round((bucket.percentage / maxPct) * 100));
+              const isTail = idx >= result.histogram!.length - 3;
+              const isHovered = hoveredBucket === idx;
+
+              return (
+                <div
+                  key={bucket.label}
+                  onMouseEnter={() => setHoveredBucket(idx)}
+                  onMouseLeave={() => setHoveredBucket(null)}
+                  className="flex flex-col items-center gap-1.5 h-full justify-end cursor-pointer group"
+                >
+                  <div className="w-full flex justify-center items-end h-24">
+                    <div
+                      className={`w-full max-w-[28px] rounded-t-md transition-all ${
+                        isHovered
+                          ? 'bg-indigo-600 ring-2 ring-indigo-300'
+                          : isTail && bucket.count > 0
+                            ? 'bg-amber-500/80 group-hover:bg-amber-500'
+                            : 'bg-indigo-500/80 group-hover:bg-indigo-500'
+                      }`}
+                      style={{ height: `${heightPct}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-mono text-slate-500 truncate max-w-full text-center">
+                    {bucket.label}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Two-Column Detailed Results & Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Statistical Percentiles Table */}
