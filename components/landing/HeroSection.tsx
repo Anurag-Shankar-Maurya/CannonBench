@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
+import { motion, useScroll, useTransform } from 'motion/react';
 import {
   ArrowRight,
   Terminal,
@@ -16,11 +17,21 @@ import {
 } from 'lucide-react';
 
 export default function HeroSection() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [simulatedRps, setSimulatedRps] = useState(14850);
   const [simulatedP99, setSimulatedP99] = useState(12.4);
   const [activeEngine, setActiveEngine] = useState<'native' | 'browser'>('native');
   const [isRunningSim, setIsRunningSim] = useState(false);
+
+  // Scroll parallax transforms
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end start'],
+  });
+
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.96]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.85]);
 
   const cliSnippet = "npx autocannon -c 50 -d 15 'https://api.example.com/v1/bench'";
 
@@ -35,22 +46,30 @@ export default function HeroSection() {
     let count = 0;
     const interval = setInterval(() => {
       count++;
-      setSimulatedRps(Math.floor(13500 + Math.random() * 4000));
-      setSimulatedP99(Number((8.5 + Math.random() * 7.5).toFixed(1)));
-      if (count >= 7) {
+      setSimulatedRps(Math.floor(13500 + Math.random() * 4200));
+      setSimulatedP99(Number((8.2 + Math.random() * 7.8).toFixed(1)));
+      if (count >= 8) {
         clearInterval(interval);
         setIsRunningSim(false);
       }
-    }, 320);
+    }, 280);
   };
 
   return (
-    <section className="relative min-h-[calc(100vh-4rem)] flex items-center py-12 lg:py-16 bg-[#F8FAFC] border-b border-slate-200/80">
+    <section
+      ref={containerRef}
+      className="relative min-h-[calc(100vh-4rem)] flex items-center py-12 lg:py-20 bg-[#F8FAFC] border-b border-slate-200/80 overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        {/* Top Header Block */}
-        <div className="max-w-3xl">
+        {/* Animated Header Block */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-3xl"
+        >
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-white border border-slate-200 text-slate-700 text-xs font-mono mb-4 shadow-2xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>Autocannon 9.x Socket Engine</span>
             <span className="text-slate-300">/</span>
             <span>Zero Database</span>
@@ -65,7 +84,7 @@ export default function HeroSection() {
             histograms, and automated SLO quality gates. 100% terminal parity.
           </p>
 
-          {/* Action Row */}
+          {/* Action Buttons */}
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <Link
               href="/app"
@@ -89,12 +108,18 @@ export default function HeroSection() {
               )}
             </button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* The Real Product Shown Whole: app-frame */}
-        <div className="mt-10 rounded-xl bg-white border border-slate-200 shadow-xl overflow-hidden">
-          {/* App Frame Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
+        {/* Scroll-Linked App-Frame Showcase */}
+        <motion.div
+          style={{ scale, opacity }}
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-10 rounded-xl bg-white border border-slate-200 shadow-2xl overflow-hidden"
+        >
+          {/* App Window Title Bar */}
+          <div className="flex items-center justify-between px-4 py-3 bg-slate-50/90 border-b border-slate-200 backdrop-blur-xs">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
               <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
@@ -131,9 +156,10 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Workbench Controls & Target Bar */}
-          <div className="p-4 sm:p-5 space-y-4 bg-white">
-            <div className="flex flex-col sm:flex-row items-center gap-2.5 bg-slate-50 p-2 rounded-lg border border-slate-200">
+          {/* Workbench Body */}
+          <div className="p-4 sm:p-6 space-y-4 bg-white">
+            {/* Target URL Bar */}
+            <div className="flex flex-col sm:flex-row items-center gap-2.5 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
               <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-mono text-xs font-semibold rounded border border-emerald-200 shrink-0">
                 POST
               </span>
@@ -145,7 +171,7 @@ export default function HeroSection() {
                   type="button"
                   onClick={runSimulatedBurst}
                   disabled={isRunningSim}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-slate-900 hover:bg-slate-800 active:scale-[0.98] disabled:opacity-50 text-white rounded transition-all shadow-xs"
                 >
                   <Play className={`w-3 h-3 ${isRunningSim ? 'animate-spin' : ''}`} />
                   <span>{isRunningSim ? 'Streaming...' : 'Run 15k Burst'}</span>
@@ -160,9 +186,9 @@ export default function HeroSection() {
               </div>
             </div>
 
-            {/* 4 True-size Telemetry Readout Cards */}
+            {/* 4 Telemetry Readout Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="flex items-center justify-between text-slate-500 text-xs">
                   <span>Throughput</span>
                   <Activity className="w-3.5 h-3.5 text-indigo-600" />
@@ -176,7 +202,7 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="flex items-center justify-between text-slate-500 text-xs">
                   <span>p99 Latency</span>
                   <Gauge className="w-3.5 h-3.5 text-amber-600" />
@@ -190,7 +216,7 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="flex items-center justify-between text-slate-500 text-xs">
                   <span>Error Rate</span>
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
@@ -203,7 +229,7 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
                 <div className="flex items-center justify-between text-slate-500 text-xs">
                   <span>SLO Gate</span>
                   <Cpu className="w-3.5 h-3.5 text-indigo-600" />
@@ -217,40 +243,83 @@ export default function HeroSection() {
               </div>
             </div>
 
-            {/* Binned Latency Histogram */}
-            <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
-              <div className="flex items-center justify-between text-xs font-mono text-slate-500 mb-2">
-                <span>Latency Distribution (Logarithmic Bins)</span>
-                <span>Sample: 225,000 Requests</span>
-              </div>
-              <div className="h-14 flex items-end gap-1.5 pt-1">
-                {[12, 28, 48, 92, 100, 68, 30, 16, 8, 4, 2, 1, 0, 1].map((pct, idx) => (
-                  <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end">
-                    <div
-                      className={`w-full rounded-t-xs transition-all duration-200 ${
-                        idx < 6
-                          ? 'bg-emerald-500'
-                          : idx < 9
-                          ? 'bg-indigo-600'
-                          : idx < 11
-                          ? 'bg-amber-500'
-                          : 'bg-rose-500'
-                      }`}
-                      style={{ height: `${Math.max(6, pct)}%` }}
+            {/* Live Streaming Wave Graphic + Binned Histogram */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+              {/* Telemetry Wave Card */}
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 flex flex-col justify-between">
+                <div className="flex items-center justify-between text-xs font-mono text-slate-500 mb-2">
+                  <span>Live 1-Sec Telemetry Ticks</span>
+                  <span className="text-emerald-600 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    STREAMING
+                  </span>
+                </div>
+                <div className="h-16 w-full flex items-center">
+                  <svg
+                    className="w-full h-full overflow-visible"
+                    viewBox="0 0 320 60"
+                    fill="none"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M0 45 Q 30 20, 60 38 T 120 28 T 180 34 T 240 18 T 300 24 L 320 22"
+                      stroke="#4F46E5"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
                     />
-                  </div>
-                ))}
+                    <path
+                      d="M0 52 Q 30 48, 60 50 T 120 46 T 180 49 T 240 44 T 300 48 L 320 46"
+                      stroke="#059669"
+                      strokeWidth="1.75"
+                      strokeDasharray="3 3"
+                    />
+                  </svg>
+                </div>
+                <div className="flex justify-between text-[10px] font-mono text-slate-400 border-t border-slate-200 pt-1.5 mt-1">
+                  <span className="text-indigo-600 font-medium">Throughput (RPS)</span>
+                  <span className="text-emerald-600 font-medium">Latency (ms)</span>
+                </div>
               </div>
-              <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1.5 border-t border-slate-200 pt-1">
-                <span>&le; 2ms</span>
-                <span>5ms</span>
-                <span>10ms (p50)</span>
-                <span>25ms (p99)</span>
-                <span>&gt; 100ms</span>
+
+              {/* Binned Latency Histogram */}
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between text-xs font-mono text-slate-500 mb-2">
+                  <span>Latency Distribution (Logarithmic Bins)</span>
+                  <span>Sample: 225,000</span>
+                </div>
+                <div className="h-16 flex items-end gap-1.5 pt-1">
+                  {[12, 28, 48, 92, 100, 68, 30, 16, 8, 4, 2, 1, 0, 1].map((pct, idx) => (
+                    <motion.div
+                      key={idx}
+                      className="flex-1 flex flex-col items-center h-full justify-end"
+                      whileHover={{ scaleY: 1.05 }}
+                    >
+                      <div
+                        className={`w-full rounded-t-xs transition-all duration-300 ${
+                          idx < 6
+                            ? 'bg-emerald-500'
+                            : idx < 9
+                            ? 'bg-indigo-600'
+                            : idx < 11
+                            ? 'bg-amber-500'
+                            : 'bg-rose-500'
+                        }`}
+                        style={{ height: `${Math.max(6, pct)}%` }}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1.5 border-t border-slate-200 pt-1">
+                  <span>&le; 2ms</span>
+                  <span>5ms</span>
+                  <span>10ms (p50)</span>
+                  <span>25ms (p99)</span>
+                  <span>&gt; 100ms</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

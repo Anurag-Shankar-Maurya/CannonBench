@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import LandingNavbar from '@/components/landing/Navbar';
 import HeroSection from '@/components/landing/HeroSection';
 import TrustMetricsBar from '@/components/landing/TrustMetricsBar';
+import FeatureWalkthrough from '@/components/landing/FeatureWalkthrough';
 import BentoFeatures from '@/components/landing/BentoFeatures';
 import ComparisonMatrix from '@/components/landing/ComparisonMatrix';
 import ArchitecturePrivacy from '@/components/landing/ArchitecturePrivacy';
@@ -84,6 +85,7 @@ export default function LandingHomePage() {
       <main className="flex-1">
         <HeroSection />
         <TrustMetricsBar />
+        <FeatureWalkthrough />
         <BentoFeatures />
         <ComparisonMatrix />
         <ArchitecturePrivacy />

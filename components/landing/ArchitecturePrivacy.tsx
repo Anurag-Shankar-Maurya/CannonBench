@@ -1,5 +1,8 @@
+'use client';
+
 import React from 'react';
-import { ShieldCheck, Lock, Network, Server, HardDrive, Cpu } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Lock, Network, Server, HardDrive, Cpu } from 'lucide-react';
 
 export default function ArchitecturePrivacy() {
   return (
@@ -7,7 +10,12 @@ export default function ArchitecturePrivacy() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left Column: Direct Copy */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="text-xs font-mono uppercase tracking-wider text-emerald-600 mb-2">
               Security Architecture
             </div>
@@ -67,13 +75,20 @@ export default function ArchitecturePrivacy() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Right Column: Architectural Flow Diagram */}
-          <div className="rounded-xl bg-white border border-slate-200 p-6 shadow-xl">
+          {/* Right Column: Architectural Flow Diagram with animated connection pulses */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="rounded-xl bg-white border border-slate-200 p-6 shadow-xl"
+          >
             <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <span className="font-mono text-xs text-slate-500">DATA_FLOW_PIPELINE.spec</span>
-              <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 ZERO_EXTERNAL_STORAGE
               </span>
             </div>
@@ -82,31 +97,35 @@ export default function ArchitecturePrivacy() {
               <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Cpu className="w-4 h-4 text-indigo-600" />
-                  <span className="text-slate-800">CannonBench UI (Next.js 15)</span>
+                  <span className="text-slate-800 font-semibold">CannonBench UI (Next.js 15)</span>
                 </div>
                 <span className="text-slate-500 text-[11px]">Client Browser</span>
               </div>
 
-              <div className="flex justify-center text-slate-400 text-[11px]">
+              <div className="flex items-center justify-center gap-2 text-indigo-600 py-1 text-[11px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" />
                 <span>↓ SSE Stream (/api/benchmark)</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" />
               </div>
 
               <div className="p-3 rounded-lg bg-slate-50 border border-indigo-200 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Server className="w-4 h-4 text-indigo-600" />
-                  <span className="text-slate-800">Node.js Autocannon Engine</span>
+                  <span className="text-slate-800 font-semibold">Node.js Autocannon Engine</span>
                 </div>
                 <span className="text-emerald-700 font-semibold text-[11px]">Raw TCP Sockets</span>
               </div>
 
-              <div className="flex justify-center text-slate-400 text-[11px]">
+              <div className="flex items-center justify-center gap-2 text-cyan-600 py-1 text-[11px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" />
                 <span>↓ Direct POSIX Socket Traffic</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-bounce" />
               </div>
 
               <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Network className="w-4 h-4 text-cyan-600" />
-                  <span className="text-slate-800">Target HTTP / HTTP/2 Server</span>
+                  <span className="text-slate-800 font-semibold">Target HTTP / HTTP/2 Server</span>
                 </div>
                 <span className="text-slate-500 text-[11px]">Your API</span>
               </div>
@@ -115,7 +134,7 @@ export default function ArchitecturePrivacy() {
             <div className="mt-6 pt-3 border-t border-slate-200 text-[11px] font-mono text-slate-500 leading-relaxed">
               No telemetry, credentials, or payloads leave your machine.
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

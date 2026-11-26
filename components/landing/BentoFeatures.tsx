@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { motion } from 'motion/react';
 import {
   Zap,
   ClipboardPaste,
@@ -13,7 +16,13 @@ export default function BentoFeatures() {
     <section id="features" className="py-20 sm:py-28 bg-[#F8FAFC] border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="max-w-2xl">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5 }}
+          className="max-w-2xl"
+        >
           <div className="text-xs font-mono uppercase tracking-wider text-indigo-600 mb-2">
             Workbench Capabilities
           </div>
@@ -24,12 +33,19 @@ export default function BentoFeatures() {
             Every feature runs on raw socket execution, automated assertions, and client-side
             persistence.
           </p>
-        </div>
+        </motion.div>
 
         {/* Feature Grid */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Card 1: Dual Execution Engines (Span 2 cols on md) */}
-          <div className="md:col-span-2 rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4 }}
+            whileHover={{ y: -3 }}
+            className="md:col-span-2 rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all"
+          >
             <div>
               <div className="flex items-center gap-2 text-indigo-600 text-xs font-mono mb-2">
                 <Zap className="w-4 h-4 fill-current" />
@@ -62,10 +78,17 @@ export default function BentoFeatures() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 2: Smart cURL Auto-Import */}
-          <div className="rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            whileHover={{ y: -3 }}
+            className="rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all"
+          >
             <div>
               <div className="flex items-center gap-2 text-cyan-600 text-xs font-mono mb-2">
                 <ClipboardPaste className="w-4 h-4" />
@@ -86,10 +109,17 @@ export default function BentoFeatures() {
             <div className="mt-6 p-3 rounded-lg bg-slate-50 border border-slate-200 font-mono text-xs text-slate-700 truncate">
               <span className="text-slate-400">$</span> curl -X POST &apos;https://api.com/v1/checkout/&apos;
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 3: Automated SLO Quality Gates */}
-          <div className="rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4 }}
+            whileHover={{ y: -3 }}
+            className="rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all"
+          >
             <div>
               <div className="flex items-center gap-2 text-emerald-600 text-xs font-mono mb-2">
                 <ShieldAlert className="w-4 h-4" />
@@ -118,10 +148,17 @@ export default function BentoFeatures() {
                 <span className="text-slate-500">0.00% (Pass)</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 4: Multi-Step Request Chaining */}
-          <div className="rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            whileHover={{ y: -3 }}
+            className="rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all"
+          >
             <div>
               <div className="flex items-center gap-2 text-purple-600 text-xs font-mono mb-2">
                 <GitMerge className="w-4 h-4" />
@@ -143,10 +180,17 @@ export default function BentoFeatures() {
               <div className="text-slate-600">Step 1: POST /api/login → $.token</div>
               <div className="text-purple-700 font-medium">Step 2: GET /api/orders [Bearer &#123;&#123;token&#125;&#125;]</div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 5: Binned Latency Histograms */}
-          <div className="rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            whileHover={{ y: -3 }}
+            className="rounded-xl bg-white border border-slate-200 p-6 sm:p-8 flex flex-col justify-between hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all"
+          >
             <div>
               <div className="flex items-center gap-2 text-amber-600 text-xs font-mono mb-2">
                 <BarChart3 className="w-4 h-4" />
@@ -165,7 +209,7 @@ export default function BentoFeatures() {
               <span className="text-slate-600">Run #14 vs #13</span>
               <span className="text-emerald-700 font-semibold">-24.2% p99 Latency</span>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { motion } from 'motion/react';
 import { Check, X } from 'lucide-react';
 
 export default function ComparisonMatrix() {
@@ -72,7 +75,13 @@ export default function ComparisonMatrix() {
   return (
     <section id="comparisons" className="py-20 sm:py-28 bg-[#F8FAFC] border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-2xl">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5 }}
+          className="max-w-2xl"
+        >
           <div className="text-xs font-mono uppercase tracking-wider text-indigo-600 mb-2">
             Tool Comparison
           </div>
@@ -82,10 +91,16 @@ export default function ComparisonMatrix() {
           <p className="mt-3 text-sm sm:text-base text-slate-600">
             Comparing CannonBench with CLI generators, enterprise test platforms, and desktop tools.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Table Container */}
-        <div className="mt-10 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-2xs">
+        {/* Animated Table Container */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mt-10 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-2xs"
+        >
           <table className="w-full text-left border-collapse min-w-[700px] text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-mono text-xs">
@@ -163,7 +178,7 @@ export default function ComparisonMatrix() {
               ))}
             </tbody>
           </table>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
