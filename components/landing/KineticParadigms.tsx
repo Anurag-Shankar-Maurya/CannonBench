@@ -156,7 +156,7 @@ const PATTERNS: BenchPattern[] = [
   },
 ];
 
-const CYLINDER_RADIUS = 210; // Radius in px of the 3D cylinder
+const CYLINDER_RADIUS = 225; // Radius in px of the 3D cylinder
 const ANGLE_STEP_DEG = 22; // Degrees between items around the cylinder
 
 export default function KineticParadigms() {
@@ -170,14 +170,14 @@ export default function KineticParadigms() {
     offset: ['start start', 'end end'],
   });
 
-  // Gradually hide heading, eyebrow tag, and sub-heading with fade & slide up on scroll
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
-  const headerY = useTransform(scrollYProgress, [0, 0.05], [0, -42]);
+  // Headings fade and slide up in lockstep sync with the cylinder rolling
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0], { clamp: true });
+  const headerY = useTransform(scrollYProgress, [0, 0.12], [0, -64], { clamp: true });
 
-  // Map scroll progress across all 20 patterns once heading has cleanly disappeared
+  // Map scroll progress across all 20 patterns, synced with scroll from the very start
   const rawProgress = useTransform(
     scrollYProgress,
-    [0.06, 0.96],
+    [0, 1],
     [0, PATTERNS.length - 1]
   );
 
@@ -228,34 +228,32 @@ export default function KineticParadigms() {
       ref={containerRef}
       className="relative min-h-[320vh] bg-[#FAF8F5] border-b border-slate-200/80"
     >
-      {/* Section Header with Gradual Fade and Up Scroll Animation */}
-      <div className="pt-20 pb-8 text-center max-w-4xl mx-auto px-4 select-none pointer-events-none">
+      {/* Sticky Viewport Stage with generous edge-to-edge breathing room */}
+      <div className="sticky top-16 h-[calc(100vh-5rem)] max-h-[820px] flex flex-col justify-between py-6 w-full overflow-hidden select-none">
+        {/* Section Header with Gradual Fade and Up Scroll Animation in lockstep with cylinder */}
         <motion.div
           style={{ opacity: headerOpacity, y: headerY }}
-          className="text-center max-w-4xl mx-auto"
+          className="absolute top-4 sm:top-6 inset-x-0 text-center max-w-4xl mx-auto px-4 select-none pointer-events-none z-20"
         >
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-2">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-1.5">
             <Sparkles className="w-3.5 h-3.5" />
             <span>The Draw</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900">
             Twenty testing patterns. One workbench.
           </h2>
-          <p className="mt-2 text-slate-500 text-xs sm:text-sm">
+          <p className="mt-1 text-slate-500 text-xs sm:text-sm">
             Scroll to roll through high-concurrency API testing archetypes.
           </p>
         </motion.div>
-      </div>
 
-      {/* Sticky Viewport Stage with generous edge-to-edge breathing room */}
-      <div className="sticky top-16 h-[calc(100vh-5rem)] max-h-[780px] flex flex-col justify-between py-6 w-full overflow-hidden select-none">
         {/* 3D Cylindrical Drum Reel Stage */}
         <div
-          className="relative w-full h-[480px] flex items-center justify-center my-auto overflow-hidden"
+          className="relative w-full h-[500px] sm:h-[530px] flex items-center justify-center my-auto overflow-hidden"
           style={{ perspective: 1100 }}
         >
           {/* Edge-to-Edge Hairline Guideline Slot with Inward Calipers */}
-          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[68px] border-y border-slate-300/80 bg-[radial-gradient(ellipse_75%_100%_at_50%_50%,_rgba(249,115,22,0.14)_0%,_transparent_100%)] pointer-events-none z-20 flex items-center justify-between px-6 sm:px-14 lg:px-24">
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[76px] sm:h-[86px] lg:h-[96px] border-y border-slate-300/80 bg-[radial-gradient(ellipse_75%_100%_at_50%_50%,_rgba(249,115,22,0.14)_0%,_transparent_100%)] pointer-events-none z-20 flex items-center justify-between px-6 sm:px-14 lg:px-24">
             {/* Left Caliper: "4 of 20 ▶" (Inward pointing triangle) */}
             <div className="flex items-center gap-2.5 font-mono text-xs sm:text-sm font-semibold text-slate-700 pointer-events-auto">
               <span>
@@ -350,7 +348,7 @@ export default function KineticParadigms() {
                   }}
                 >
                   <span
-                    className={`font-display tracking-tight block text-2xl sm:text-3xl lg:text-4xl ${
+                    className={`font-display tracking-tight block text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl max-w-[90vw] sm:max-w-none truncate sm:overflow-visible ${
                       isCenter ? 'font-extrabold' : 'font-semibold'
                     }`}
                   >
