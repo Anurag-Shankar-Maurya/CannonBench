@@ -171,8 +171,32 @@ export default function KineticParadigms() {
   });
 
   // Headings fade and slide up in lockstep sync with the cylinder rolling
-  const headerOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0], { clamp: true });
-  const headerY = useTransform(scrollYProgress, [0, 0.12], [0, -64], { clamp: true });
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.08], [1, 0], { clamp: true });
+  const headerY = useTransform(scrollYProgress, [0, 0.08], [0, -64], { clamp: true });
+
+  // Latch header dismissal so rolling the cylinder back and forth never repeatedly triggers reappearances
+  const [headerDismissed, setHeaderDismissed] = useState(false);
+
+  useEffect(() => {
+    return scrollYProgress.on('change', (latest) => {
+      if (latest >= 0.08 && headerDismissed === false) {
+        setHeaderDismissed(true);
+      }
+    });
+  }, [scrollYProgress, headerDismissed]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (containerRef.current === null) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      // Only restore heading when user scrolls completely out of the section to the top
+      if (rect.top > 140 && headerDismissed) {
+        setHeaderDismissed(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [headerDismissed]);
 
   // Map scroll progress across all 20 patterns, synced with scroll from the very start
   const rawProgress = useTransform(
@@ -232,7 +256,11 @@ export default function KineticParadigms() {
       <div className="sticky top-16 h-[calc(100vh-5rem)] max-h-[820px] flex flex-col justify-between py-6 w-full overflow-hidden select-none">
         {/* Section Header with Gradual Fade and Up Scroll Animation in lockstep with cylinder */}
         <motion.div
-          style={{ opacity: headerOpacity, y: headerY }}
+          style={{
+            opacity: headerDismissed ? 0 : headerOpacity,
+            y: headerDismissed ? -64 : headerY,
+            display: headerDismissed ? 'none' : 'block',
+          }}
           className="absolute top-4 sm:top-6 inset-x-0 text-center max-w-4xl mx-auto px-4 select-none pointer-events-none z-20"
         >
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-1.5">
@@ -366,14 +394,6 @@ export default function KineticParadigms() {
             <span className="font-semibold text-slate-900">{activePattern.name}:</span>
             <span className="text-slate-500">{activePattern.detail}</span>
           </div>
-
-          <Link
-            href="/app"
-            className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold transition-all shadow-sm"
-          >
-            <span>Open Workbench</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
       </div>
     </section>
