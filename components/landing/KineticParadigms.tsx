@@ -161,7 +161,7 @@ const ANGLE_STEP_DEG = 22; // Degrees between items around the cylinder
 
 export default function KineticParadigms() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(3); // Default to P99
+  const [activeIndex, setActiveIndex] = useState(0); // Start at pattern 0 (1 of 20)
   const [manualOffset, setManualOffset] = useState<number | null>(null);
 
   // Generous scroll track for smooth, unhurried drum rolling
@@ -213,7 +213,7 @@ export default function KineticParadigms() {
     restDelta: 0.001,
   });
 
-  const [currentFloat, setCurrentFloat] = useState(3);
+  const [currentFloat, setCurrentFloat] = useState(0);
 
   useEffect(() => {
     return smoothProgress.on('change', (latest) => {
@@ -389,9 +389,8 @@ export default function KineticParadigms() {
         </div>
 
         {/* Bottom Details Footer Bar with wide padding */}
-        <div className="max-w-5xl mx-auto w-full px-6 sm:px-12 pt-2 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div className="text-slate-600 font-mono flex items-center gap-2 text-center sm:text-left">
-            <span className="font-semibold text-slate-900">{activePattern.name}:</span>
+        <div className="max-w-5xl mx-auto w-full px-6 sm:px-12 pt-2 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-center gap-3 text-xs">
+          <div className="text-slate-600 font-mono flex items-center gap-2 text-center">
             <span className="text-slate-500">{activePattern.detail}</span>
           </div>
         </div>
