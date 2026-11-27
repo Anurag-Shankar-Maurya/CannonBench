@@ -170,10 +170,14 @@ export default function KineticParadigms() {
     offset: ['start start', 'end end'],
   });
 
-  // Map scroll progress across all 20 patterns
+  // Gradually hide heading, eyebrow tag, and sub-heading with fade & slide up on scroll
+  const headerOpacity = useTransform(scrollYProgress, [0, 0.05], [1, 0]);
+  const headerY = useTransform(scrollYProgress, [0, 0.05], [0, -42]);
+
+  // Map scroll progress across all 20 patterns once heading has cleanly disappeared
   const rawProgress = useTransform(
     scrollYProgress,
-    [0.03, 0.97],
+    [0.06, 0.96],
     [0, PATTERNS.length - 1]
   );
 
@@ -224,10 +228,12 @@ export default function KineticParadigms() {
       ref={containerRef}
       className="relative min-h-[320vh] bg-[#FAF8F5] border-b border-slate-200/80"
     >
-      {/* Sticky Viewport Stage with generous edge-to-edge breathing room */}
-      <div className="sticky top-16 h-[88vh] max-h-[780px] flex flex-col justify-between py-6 w-full overflow-hidden select-none">
-        {/* Section Header */}
-        <div className="text-center max-w-4xl mx-auto px-4 pt-2">
+      {/* Section Header with Gradual Fade and Up Scroll Animation */}
+      <div className="pt-20 pb-8 text-center max-w-4xl mx-auto px-4 select-none pointer-events-none">
+        <motion.div
+          style={{ opacity: headerOpacity, y: headerY }}
+          className="text-center max-w-4xl mx-auto"
+        >
           <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-2">
             <Sparkles className="w-3.5 h-3.5" />
             <span>The Draw</span>
@@ -238,11 +244,14 @@ export default function KineticParadigms() {
           <p className="mt-2 text-slate-500 text-xs sm:text-sm">
             Scroll to roll through high-concurrency API testing archetypes.
           </p>
-        </div>
+        </motion.div>
+      </div>
 
+      {/* Sticky Viewport Stage with generous edge-to-edge breathing room */}
+      <div className="sticky top-16 h-[calc(100vh-5rem)] max-h-[780px] flex flex-col justify-between py-6 w-full overflow-hidden select-none">
         {/* 3D Cylindrical Drum Reel Stage */}
         <div
-          className="relative w-full h-[440px] flex items-center justify-center my-auto overflow-hidden"
+          className="relative w-full h-[480px] flex items-center justify-center my-auto overflow-hidden"
           style={{ perspective: 1100 }}
         >
           {/* Edge-to-Edge Hairline Guideline Slot with Inward Calipers */}
