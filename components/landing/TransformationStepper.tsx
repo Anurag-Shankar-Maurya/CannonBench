@@ -1,18 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'motion/react';
 import {
   Sparkles,
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Check,
   AlertTriangle,
   ShieldCheck,
-  Terminal,
-  Activity,
 } from 'lucide-react';
 
 interface Step {
@@ -67,59 +64,92 @@ const STEPS: Step[] = [
 ];
 
 export default function TransformationStepper() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [activeStepIndex, setActiveStepIndex] = useState(0);
+  const [manualOffset, setManualOffset] = useState<number | null>(null);
+
+  // Scroll driven animation across the 250vh track
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  });
+
+  // Map scroll progress across the 5 steps
+  const stepProgress = useTransform(
+    scrollYProgress,
+    [0.08, 0.92],
+    [0, STEPS.length - 1]
+  );
+
+  const smoothStep = useSpring(stepProgress, {
+    stiffness: 85,
+    damping: 20,
+    restDelta: 0.001,
+  });
+
+  useEffect(() => {
+    return smoothStep.on('change', (latest) => {
+      if (manualOffset === null) {
+        const clamped = Math.max(0, Math.min(STEPS.length - 1, Math.round(latest)));
+        setActiveStepIndex(clamped);
+      }
+    });
+  }, [smoothStep, manualOffset]);
+
+  const handleManualSelect = (index: number) => {
+    setManualOffset(index);
+    setActiveStepIndex(index);
+    setTimeout(() => {
+      setManualOffset(null);
+    }, 1400);
+  };
 
   const handlePrev = () => {
-    setActiveStepIndex((prev) => (prev > 0 ? prev - 1 : STEPS.length - 1));
+    const nextIndex = activeStepIndex > 0 ? activeStepIndex - 1 : STEPS.length - 1;
+    handleManualSelect(nextIndex);
   };
 
   const handleNext = () => {
-    setActiveStepIndex((prev) => (prev < STEPS.length - 1 ? prev + 1 : 0));
+    const nextIndex = activeStepIndex < STEPS.length - 1 ? activeStepIndex + 1 : 0;
+    handleManualSelect(nextIndex);
   };
 
   const activeStep = STEPS[activeStepIndex];
 
   return (
-    <section id="transformation" className="py-20 lg:py-28 bg-[#FBFBFB] border-b border-slate-200/80">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header with Scroll Entrance */}
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-3xl mb-12"
-        >
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-2">
+    <section
+      id="transformation"
+      ref={containerRef}
+      className="relative min-h-[250vh] bg-[#FBFBFB] border-b border-slate-200/80"
+    >
+      {/* Sticky Viewport Stage */}
+      <div className="sticky top-16 min-h-[85vh] max-h-[780px] flex flex-col justify-between py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden select-none">
+        {/* Section Header */}
+        <div className="max-w-3xl mb-4">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-orange-600 mb-1">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Before & After</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-slate-900">
             From blind load testing to surgical benchmarking.
           </h2>
-          <p className="mt-4 text-slate-600 text-sm sm:text-base leading-relaxed">
-            See how API performance verification evolves from crude command-line scripts into an automated, precision engineering workflow.
+          <p className="mt-1 text-slate-600 text-xs sm:text-sm">
+            Scroll down to watch primitive shell scripts evolve into automated regression gates.
           </p>
-        </motion.div>
+        </div>
 
-        {/* 2-Column Stepper Layout with Scroll Entrance */}
-        <motion.div
-          initial={{ opacity: 0, y: 32 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
-        >
+        {/* 2-Column Stepper Layout driven by page scroll */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
           {/* Left Column: Step List Navigation */}
-          <div className="lg:col-span-5 space-y-3">
+          <div className="lg:col-span-5 space-y-2 pointer-events-auto">
             {STEPS.map((step, index) => {
               const isCurrent = index === activeStepIndex;
               return (
                 <button
                   key={step.id}
                   type="button"
-                  onClick={() => setActiveStepIndex(index)}
-                  className={`w-full text-left p-4 rounded-2xl transition-all border ${
+                  onClick={() => handleManualSelect(index)}
+                  className={`w-full text-left p-3.5 rounded-2xl transition-all border cursor-pointer ${
                     isCurrent
                       ? 'bg-white border-orange-300 shadow-md ring-1 ring-orange-200'
                       : 'bg-transparent border-transparent hover:bg-white/60 hover:border-slate-200 text-slate-600'
@@ -150,6 +180,7 @@ export default function TransformationStepper() {
                     <motion.p
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
+                      transition={{ duration: 0.2 }}
                       className="mt-2 text-xs text-slate-600 leading-relaxed"
                     >
                       {step.description}
@@ -162,13 +193,13 @@ export default function TransformationStepper() {
             {/* Stepper Controls */}
             <div className="pt-2 flex items-center justify-between px-2">
               <span className="text-xs font-mono text-slate-500">
-                Interactive transformation
+                Scroll page or click steps
               </span>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handlePrev}
-                  className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors"
+                  className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors"
                   aria-label="Previous step"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -176,7 +207,7 @@ export default function TransformationStepper() {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="p-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors"
+                  className="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors"
                   aria-label="Next step"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -185,9 +216,9 @@ export default function TransformationStepper() {
             </div>
           </div>
 
-          {/* Right Column: Dynamic Preview Window that Transforms */}
-          <div className="lg:col-span-7">
-            <div className="rounded-3xl bg-white border border-slate-200/90 shadow-lg overflow-hidden min-h-[460px] flex flex-col justify-between">
+          {/* Right Column: Dynamic Preview Window that Transforms on Scroll */}
+          <div className="lg:col-span-7 pointer-events-auto">
+            <div className="rounded-3xl bg-white border border-slate-200/90 shadow-lg overflow-hidden min-h-[440px] flex flex-col justify-between">
               {/* Window Header */}
               <div className="bg-slate-900 px-5 py-3 text-slate-200 flex items-center justify-between text-xs border-b border-slate-800">
                 <div className="flex items-center gap-2">
@@ -232,6 +263,7 @@ export default function TransformationStepper() {
                       initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
                       className="space-y-4 font-mono text-xs"
                     >
                       <div className="p-4 rounded-xl bg-slate-900 text-slate-300 border border-slate-800 space-y-2">
@@ -263,6 +295,7 @@ export default function TransformationStepper() {
                       initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
                       className="space-y-4 font-mono text-xs"
                     >
                       <div className="grid grid-cols-2 gap-4">
@@ -291,6 +324,7 @@ export default function TransformationStepper() {
                       initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
                       className="space-y-4 font-mono text-xs"
                     >
                       <div className="text-slate-500 text-xs">HDR Latency Histogram (15,420 samples)</div>
@@ -322,6 +356,7 @@ export default function TransformationStepper() {
                       initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
                       className="space-y-4"
                     >
                       <div className="flex items-center justify-between text-xs font-mono">
@@ -357,6 +392,7 @@ export default function TransformationStepper() {
                       initial={{ opacity: 0, scale: 0.98 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
                       className="space-y-4"
                     >
                       <div className="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-3">
@@ -412,7 +448,7 @@ export default function TransformationStepper() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
